@@ -1,0 +1,197 @@
+{% extends "base.html" %}
+
+{% block title %}Expiry Monitoring — SurplusShare{% endblock %}
+{% block page_title %}Real-Time Expiry Monitoring{% endblock %}
+
+{% block content %}
+<div class="monitoring-container">
+  <!-- Header Info Banner -->
+  <div class="card rounded-3 shadow-sm border-0 mb-4 bg-forest text-white p-3 p-md-4">
+    <div class="row align-items-center">
+      <div class="col-md-8">
+        <span class="badge bg-terracotta text-white mb-2 rounded-pill font-monospace text-uppercase" style="font-size: 0.75rem;">
+          Waste Prevention Watch
+        </span>
+        <h3 class="fw-bold font-heading mb-1">Time-Critical Food Prioritization</h3>
+        <p class="small text-cream-muted mb-0">
+          Surplus food is actively monitored using precise timestamp comparisons. Food nearing expiry is elevated in matching queues before it becomes unsafe or spoiled.
+        </p>
+      </div>
+      <div class="col-md-4 text-md-end mt-3 mt-md-0">
+        <div class="d-inline-flex align-items-center bg-forest-dark p-2 rounded-pill">
+          <span class="small text-sage-light me-2">Threshold:</span>
+          <div class="btn-group btn-group-sm" role="group">
+            <a href="{{ url_for('monitoring.monitoring_page', hours=6) }}" class="btn btn-sm {% if hours == 6 %}btn-terracotta text-white{% else %}btn-outline-light{% endif %} rounded-pill">6h</a>
+            <a href="{{ url_for('monitoring.monitoring_page', hours=12) }}" class="btn btn-sm {% if hours == 12 %}btn-gold text-white{% else %}btn-outline-light{% endif %} rounded-pill">12h</a>
+            <a href="{{ url_for('monitoring.monitoring_page', hours=24) }}" class="btn btn-sm {% if hours == 24 %}btn-leaf text-white{% else %}btn-outline-light{% endif %} rounded-pill">24h</a>
+            <a href="{{ url_for('monitoring.monitoring_page', hours=48) }}" class="btn btn-sm {% if hours == 48 %}btn-sage text-forest{% else %}btn-outline-light{% endif %} rounded-pill">48h</a>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Priority Section 1: Urgent Attention (<6h) -->
+  <div class="card rounded-3 shadow-sm border-0 mb-4 bg-surface">
+    <div class="card-header bg-terracotta text-white py-3 d-flex justify-content-between align-items-center rounded-top-3">
+      <div class="d-flex align-items-center">
+        <i data-lucide="alert-octagon" class="me-2"></i>
+        <h5 class="mb-0 fw-bold">Critical Priority &mdash; Expiring Within 6 Hours</h5>
+      </div>
+      <a href="{{ url_for('matching.matching_page') }}" class="btn btn-sm btn-outline-light rounded-pill">
+        Match Immediately &rarr;
+      </a>
+    </div>
+    <div class="card-body p-0">
+      {% set urgent_items = [] %}
+      {% for item in expiring_listings %}
+        {% if item.expiry_at|expiry_status == 'urgent' %}
+          {% set _ = urgent_items.append(item) %}
+        {% endif %}
+      {% endfor %}
+
+      {% if urgent_items %}
+        <div class="table-responsive">
+          <table class="table table-hover align-middle mb-0 custom-table">
+            <thead class="table-light small text-muted text-uppercase">
+              <tr>
+                <th>Listing ID</th>
+                <th>Food Item</th>
+                <th>Category</th>
+                <th>Quantity</th>
+                <th>Donor</th>
+                <th>Pickup Location</th>
+                <th>Time Left</th>
+                <th>Action</th>
+              </tr>
+            </thead>
+            <tbody>
+              {% for item in urgent_items %}
+                <tr>
+                  <td class="font-monospace fw-semibold">{{ item.listing_id }}</td>
+                  <td><strong class="text-charcoal">{{ item.food_name }}</strong></td>
+                  <td><span class="badge bg-sage-light text-forest">{{ item.category }}</span></td>
+                  <td><span class="fw-bold">{{ item.quantity }}</span> {{ item.unit }}</td>
+                  <td class="small">{{ item.donor_name }}</td>
+                  <td class="small text-muted">{{ item.pickup_location }}</td>
+                  <td>
+                    <span data-expiry-timestamp="{{ item.expiry_at }}" class="badge badge-urgent">
+                      {{ item.expiry_at|time_ago }}
+                    </span>
+                  </td>
+                  <td>
+                    <a href="{{ url_for('listings.listing_detail', listing_id=item.listing_id) }}" class="btn btn-sm btn-outline-forest rounded-pill">
+                      Inspect
+                    </a>
+                  </td>
+                </tr>
+              {% endfor %}
+            </tbody>
+          </table>
+        </div>
+      {% else %}
+        <div class="p-4 text-center text-muted small">
+          <i data-lucide="check-circle" class="text-leaf mb-2" style="width: 28px; height: 28px;"></i>
+          <p class="mb-0">No surplus food currently falls into the critical 6-hour window.</p>
+        </div>
+      {% endif %}
+    </div>
+  </div>
+
+  <!-- Priority Section 2: Expiring Soon (<24h Warning) -->
+  <div class="card rounded-3 shadow-sm border-0 mb-4 bg-surface">
+    <div class="card-header bg-gold text-white py-3 d-flex justify-content-between align-items-center rounded-top-3">
+      <div class="d-flex align-items-center">
+        <i data-lucide="clock" class="me-2"></i>
+        <h5 class="mb-0 fw-bold">Expiring Soon &mdash; Within {{ hours }} Hours</h5>
+      </div>
+      <span class="badge bg-white text-dark rounded-pill">{{ expiring_listings|length }} items</span>
+    </div>
+    <div class="card-body p-0">
+      {% if expiring_listings %}
+        <div class="table-responsive">
+          <table class="table table-hover align-middle mb-0 custom-table">
+            <thead class="table-light small text-muted text-uppercase">
+              <tr>
+                <th>Listing ID</th>
+                <th>Food Item</th>
+                <th>Category</th>
+                <th>Quantity</th>
+                <th>Donor</th>
+                <th>Pickup Location</th>
+                <th>Expiry Timestamp</th>
+                <th>Countdown</th>
+              </tr>
+            </thead>
+            <tbody>
+              {% for item in expiring_listings %}
+                <tr>
+                  <td class="font-monospace fw-semibold">{{ item.listing_id }}</td>
+                  <td><strong>{{ item.food_name }}</strong></td>
+                  <td><span class="badge bg-sage-light text-forest">{{ item.category }}</span></td>
+                  <td>{{ item.quantity }} {{ item.unit }}</td>
+                  <td class="small text-muted">{{ item.donor_name }}</td>
+                  <td class="small text-muted">{{ item.pickup_location }}</td>
+                  <td class="small">{{ item.expiry_at|format_datetime }}</td>
+                  <td>
+                    <span data-expiry-timestamp="{{ item.expiry_at }}" class="badge badge-{{ item.expiry_at|expiry_status }}">
+                      {{ item.expiry_at|time_ago }}
+                    </span>
+                  </td>
+                </tr>
+              {% endfor %}
+            </tbody>
+          </table>
+        </div>
+      {% else %}
+        <div class="p-4 text-center text-muted small">No items expiring within {{ hours }} hours.</div>
+      {% endif %}
+    </div>
+  </div>
+
+  <!-- Priority Section 3: Expired Food Archive -->
+  <div class="card rounded-3 shadow-sm border-0 bg-surface">
+    <div class="card-header bg-secondary text-white py-3 d-flex justify-content-between align-items-center rounded-top-3">
+      <div class="d-flex align-items-center">
+        <i data-lucide="archive" class="me-2"></i>
+        <h5 class="mb-0 fw-bold">Expired Food Log (Excluded from Redistribution)</h5>
+      </div>
+      <span class="badge bg-light text-dark rounded-pill">{{ expired_listings|length }} items</span>
+    </div>
+    <div class="card-body p-0">
+      {% if expired_listings %}
+        <div class="table-responsive">
+          <table class="table table-hover align-middle mb-0 text-muted">
+            <thead class="table-light small text-muted text-uppercase">
+              <tr>
+                <th>Listing ID</th>
+                <th>Food Item</th>
+                <th>Category</th>
+                <th>Quantity</th>
+                <th>Donor</th>
+                <th>Expired At</th>
+                <th>Status</th>
+              </tr>
+            </thead>
+            <tbody>
+              {% for item in expired_listings %}
+                <tr class="opacity-75">
+                  <td class="font-monospace small">{{ item.listing_id }}</td>
+                  <td><del>{{ item.food_name }}</del></td>
+                  <td><span class="badge bg-light text-muted">{{ item.category }}</span></td>
+                  <td>{{ item.quantity }} {{ item.unit }}</td>
+                  <td class="small">{{ item.donor_name }}</td>
+                  <td class="small">{{ item.expiry_at|format_datetime }} ({{ item.expiry_at|time_ago }})</td>
+                  <td><span class="badge bg-secondary text-white">Expired</span></td>
+                </tr>
+              {% endfor %}
+            </tbody>
+          </table>
+        </div>
+      {% else %}
+        <div class="p-4 text-center text-muted small">No expired food entries logged.</div>
+      {% endif %}
+    </div>
+  </div>
+</div>
+{% endblock %}

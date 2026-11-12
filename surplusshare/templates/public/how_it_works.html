@@ -1,0 +1,200 @@
+{% extends "public/base.html" %}
+
+{% block title %}How It Works — SurplusShare — Food Waste Reallocation System{% endblock %}
+
+{% block content %}
+<!-- Header -->
+<div class="bg-forest text-white py-5">
+  <div class="container text-center">
+    <span class="badge bg-leaf text-white rounded-pill px-3 py-1 mb-2 font-monospace text-uppercase" style="font-size: 0.75rem;">
+      Redistribution Logistics &amp; DSA Architecture
+    </span>
+    <h1 class="font-heading display-5 fw-bold mb-2">How SurplusShare Works</h1>
+    <p class="fs-6 text-white-50 max-w-700 mx-auto mb-0" style="max-width: 650px;">
+      A deterministic, 5-stage reallocation lifecycle combining verified community operations with custom-implemented computer science algorithms.
+    </p>
+  </div>
+</div>
+
+<div class="container py-5">
+  <!-- Horizontal 5-Step Process Visualizer -->
+  <div class="card rounded-4 border-0 shadow-sm bg-surface p-4 p-md-5 mb-5">
+    <div class="row g-4 text-center">
+      <div class="col-md">
+        <div class="p-3 bg-cream rounded-3 border h-100">
+          <span class="badge bg-forest text-white rounded-pill mb-2">Stage 1</span>
+          <h6 class="font-heading fw-bold text-forest mb-1">Donor Posts</h6>
+          <small class="text-muted d-block">Surplus food registered with expiry timestamp</small>
+        </div>
+      </div>
+      <div class="col-md">
+        <div class="p-3 bg-cream rounded-3 border h-100">
+          <span class="badge bg-forest text-white rounded-pill mb-2">Stage 2</span>
+          <h6 class="font-heading fw-bold text-forest mb-1">Pantry Requests</h6>
+          <small class="text-muted d-block">Enqueued into Category FIFO queues</small>
+        </div>
+      </div>
+      <div class="col-md">
+        <div class="p-3 bg-leaf-subtle border border-leaf rounded-3 h-100">
+          <span class="badge bg-leaf text-white rounded-pill mb-2">Stage 3 (DSA)</span>
+          <h6 class="font-heading fw-bold text-forest mb-1">Merge Sort</h6>
+          <small class="text-muted d-block">Food sorted earliest-expiry-first (O(n log n))</small>
+        </div>
+      </div>
+      <div class="col-md">
+        <div class="p-3 bg-leaf-subtle border border-leaf rounded-3 h-100">
+          <span class="badge bg-leaf text-white rounded-pill mb-2">Stage 4 (DSA)</span>
+          <h6 class="font-heading fw-bold text-forest mb-1">FIFO Allocation</h6>
+          <small class="text-muted d-block">Fair partial fulfillment (O(1)) without bias</small>
+        </div>
+      </div>
+      <div class="col-md">
+        <div class="p-3 bg-cream rounded-3 border h-100">
+          <span class="badge bg-forest text-white rounded-pill mb-2">Stage 5 (DSA)</span>
+          <h6 class="font-heading fw-bold text-forest mb-1">DLL Pickup</h6>
+          <small class="text-muted d-block">Doubly Linked List route traversal &amp; delivery</small>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Detailed Stages Breakdown -->
+  <div class="row g-5 mb-5">
+    <!-- Stage 1 -->
+    <div class="col-lg-6">
+      <div class="d-flex align-items-start gap-3">
+        <div class="p-3 rounded-circle bg-forest text-white flex-shrink-0" style="width: 48px; height: 48px; display: flex; align-items: center; justify-content: center;">
+          <strong>1</strong>
+        </div>
+        <div>
+          <h4 class="font-heading fw-bold text-forest mb-2">Commercial Surplus Food Registration</h4>
+          <p class="text-charcoal small">
+            Food donors (restaurants, bakeries, caterers, supermarkets) log into the secure Donor Portal. When edible inventory remains unsold at the end of shifts, donors register items with:
+          </p>
+          <ul class="text-charcoal small ps-3 mb-0">
+            <li>Standardized food category (Bakery, Vegetables, Fruits, Prepared Meals, Dairy, Dry Goods, Other)</li>
+            <li>Exact available quantity and unit (pieces, kg, liters, servings, packs)</li>
+            <li>Mandatory strict future expiry timestamp (down to the hour and minute)</li>
+            <li>Pickup address and specific storage instructions (e.g., refrigerated, room temp)</li>
+          </ul>
+        </div>
+      </div>
+    </div>
+
+    <!-- Stage 2 -->
+    <div class="col-lg-6">
+      <div class="d-flex align-items-start gap-3">
+        <div class="p-3 rounded-circle bg-forest text-white flex-shrink-0" style="width: 48px; height: 48px; display: flex; align-items: center; justify-content: center;">
+          <strong>2</strong>
+        </div>
+        <div>
+          <h4 class="font-heading fw-bold text-forest mb-2">Community Organization Demand Queuing</h4>
+          <p class="text-charcoal small">
+            Pantries, feeding programs, and shelters register demand according to their operational capacity. Requests enter <strong>Category-Partitioned FIFO Queues</strong>:
+          </p>
+          <ul class="text-charcoal small ps-3 mb-0">
+            <li><strong>FIFO Ordering ($O(1)$ operations):</strong> Requests submitted earlier maintain precedence to prevent starvation and ensure equal access.</li>
+            <li><strong>Shelf-Life Filtering:</strong> Organizations can specify a minimum acceptable remaining shelf-life (e.g. at least 12 hours) if distribution requires travel time.</li>
+            <li><strong>Fair Partial Fulfillment:</strong> If a donor provides 50 units and the top request asks for 30, 30 are allocated and the remaining 20 immediately flow to the next organization in queue.</li>
+          </ul>
+        </div>
+      </div>
+    </div>
+
+    <!-- Stage 3 -->
+    <div class="col-lg-6">
+      <div class="d-flex align-items-start gap-3">
+        <div class="p-3 rounded-circle bg-leaf text-white flex-shrink-0" style="width: 48px; height: 48px; display: flex; align-items: center; justify-content: center;">
+          <strong>3</strong>
+        </div>
+        <div>
+          <h4 class="font-heading fw-bold text-forest mb-2">Merge Sort Expiry Prioritization</h4>
+          <p class="text-charcoal small">
+            To prevent food from expiring while waiting in inventory, the system runs a pure Python implementation of <strong>Merge Sort</strong> ($O(n \log n)$ divide-and-conquer):
+          </p>
+          <ul class="text-charcoal small ps-3 mb-0">
+            <li><strong>Chronological Guarantee:</strong> Orders listings by expiry timestamp ascending, placing the most time-critical surplus at the very front of the matching pipeline.</li>
+            <li><strong>Stable Sort Property:</strong> Listings with identical expiry timestamps preserve their original submission order, ensuring fairness among donors.</li>
+            <li><strong>Automated Expiry Exclusion:</strong> Any listings whose expiry timestamp has passed are automatically excluded from the candidate pool.</li>
+          </ul>
+        </div>
+      </div>
+    </div>
+
+    <!-- Stage 4 -->
+    <div class="col-lg-6">
+      <div class="d-flex align-items-start gap-3">
+        <div class="p-3 rounded-circle bg-leaf text-white flex-shrink-0" style="width: 48px; height: 48px; display: flex; align-items: center; justify-content: center;">
+          <strong>4</strong>
+        </div>
+        <div>
+          <h4 class="font-heading fw-bold text-forest mb-2">Deterministic Matching &amp; Atomic Commit</h4>
+          <p class="text-charcoal small">
+            The automated matching engine matches sorted food listings with the head of the corresponding category FIFO queue:
+          </p>
+          <ul class="text-charcoal small ps-3 mb-0">
+            <li>Evaluates shelf-life constraints and rejects invalid candidate pairs without losing request queue positions.</li>
+            <li>Executes an atomic database transaction: updates listing allocated quantity, marks request status, and records an immutable allocation entry with unique ID (e.g. <code>AL-001</code>).</li>
+            <li>Writes a complete audit log entry documenting the algorithm execution timestamp and run statistics.</li>
+          </ul>
+        </div>
+      </div>
+    </div>
+
+    <!-- Stage 5 -->
+    <div class="col-12">
+      <div class="p-4 p-md-5 rounded-4 bg-surface border shadow-sm">
+        <div class="d-flex align-items-start gap-3">
+          <div class="p-3 rounded-circle bg-forest text-white flex-shrink-0" style="width: 48px; height: 48px; display: flex; align-items: center; justify-content: center;">
+            <strong>5</strong>
+          </div>
+          <div>
+            <h4 class="font-heading fw-bold text-forest mb-2">Volunteer Pickup Routing via Doubly Linked Lists</h4>
+            <p class="text-charcoal small mb-3">
+              Pickup stops are linked sequentially as an interactive <strong>Doubly Linked List (DLL)</strong>:
+            </p>
+            <div class="row g-3">
+              <div class="col-md-4">
+                <div class="p-3 bg-cream rounded-3 border h-100">
+                  <h6 class="fw-bold text-forest mb-1">Bidirectional Traversal</h6>
+                  <small class="text-muted">Drivers execute routes forward (Head &rarr; Tail) and dispatchers review completed routes in reverse (Tail &rarr; Head) using <code>prev</code> and <code>next</code> pointer references.</small>
+                </div>
+              </div>
+              <div class="col-md-4">
+                <div class="p-3 bg-cream rounded-3 border h-100">
+                  <h6 class="fw-bold text-forest mb-1">Dynamic Node Swapping ($O(1)$)</h6>
+                  <small class="text-muted">If city traffic or urgent store closing hours require stop reordering, dispatchers can swap adjacent stop nodes in $O(1)$ time without rebuilding the array.</small>
+                </div>
+              </div>
+              <div class="col-md-4">
+                <div class="p-3 bg-cream rounded-3 border h-100">
+                  <h6 class="fw-bold text-forest mb-1">Handover &amp; Verification</h6>
+                  <small class="text-muted">Upon arrival at the community pantry, the volunteer marks the stop completed. The recipient confirms receipt, updating the live sustainability rescue counter.</small>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Academic Callout Banner -->
+  <div class="card rounded-4 border-0 bg-forest text-white p-4 p-md-5 text-center">
+    <div class="max-w-700 mx-auto" style="max-width: 650px;">
+      <h3 class="font-heading fw-bold text-white mb-2">Academic DSA Implementation</h3>
+      <p class="text-white-50 small mb-4">
+        Every algorithm in SurplusShare is manually implemented in pure Python standard libraries without relying on high-level black-box sorting or external queuing frameworks.
+      </p>
+      <div class="d-flex flex-wrap justify-content-center gap-2">
+        <a href="{{ url_for('auth.login') }}" class="btn btn-leaf rounded-pill px-4">
+          Sign In to Access Admin Laboratory &rarr;
+        </a>
+        <a href="{{ url_for('public.sustainability') }}" class="btn btn-outline-light rounded-pill px-4">
+          View Verified Impact Data
+        </a>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}

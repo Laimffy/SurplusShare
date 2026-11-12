@@ -1,0 +1,163 @@
+{% extends "public/base.html" %}
+
+{% block title %}Available Food Donations — Public Catalog — SurplusShare{% endblock %}
+
+{% block content %}
+<!-- Header -->
+<div class="bg-forest text-white py-5">
+  <div class="container text-center">
+    <span class="badge bg-leaf text-white rounded-pill px-3 py-1 mb-2 font-monospace text-uppercase" style="font-size: 0.75rem;">
+      Public Real-Time Catalog (Read-Only)
+    </span>
+    <h1 class="font-heading display-5 fw-bold mb-2">Available Food Donations</h1>
+    <p class="fs-6 text-white-50 max-w-700 mx-auto mb-0" style="max-width: 680px;">
+      Browse currently available, safe surplus food posted by local establishments across Metro Manila. Registered community pantries and feeding shelters can sign in to request allocations.
+    </p>
+  </div>
+</div>
+
+<div class="container py-5">
+  <!-- Search & Filter Bar -->
+  <div class="card rounded-4 border-0 shadow-sm bg-surface p-4 mb-4">
+    <form method="GET" action="{{ url_for('public.available_food') }}" class="row g-3 align-items-end">
+      <!-- Search Input -->
+      <div class="col-md-4">
+        <label for="searchQ" class="form-label small fw-semibold text-charcoal">Search Food Items</label>
+        <div class="input-group input-group-sm">
+          <span class="input-group-text bg-cream border-end-0">
+            <i data-lucide="search" style="width: 14px; height: 14px;" class="text-muted"></i>
+          </span>
+          <input type="text" class="form-control border-start-0 ps-0" id="searchQ" name="q" value="{{ search_query }}" placeholder="e.g. Pandesal, Mangoes, Rice...">
+        </div>
+      </div>
+
+      <!-- Category Filter -->
+      <div class="col-md-3">
+        <label for="catSelect" class="form-label small fw-semibold text-charcoal">Category</label>
+        <select class="form-select form-select-sm" id="catSelect" name="category">
+          <option value="">All Categories</option>
+          {% for cat in categories %}
+            <option value="{{ cat }}" {% if category_filter == cat %}selected{% endif %}>{{ cat }}</option>
+          {% endfor %}
+        </select>
+      </div>
+
+      <!-- Location Filter -->
+      <div class="col-md-3">
+        <label for="locSelect" class="form-label small fw-semibold text-charcoal">City / Municipality</label>
+        <select class="form-select form-select-sm" id="locSelect" name="location">
+          <option value="">All Locations</option>
+          {% for loc in locations %}
+            <option value="{{ loc }}" {% if location_filter == loc %}selected{% endif %}>{{ loc }}</option>
+          {% endfor %}
+        </select>
+      </div>
+
+      <!-- Submit & Reset -->
+      <div class="col-md-2 d-flex gap-2">
+        <button type="submit" class="btn btn-sm btn-leaf rounded-pill w-100 py-2">
+          Filter
+        </button>
+        {% if search_query or category_filter or location_filter %}
+          <a href="{{ url_for('public.available_food') }}" class="btn btn-sm btn-outline-secondary rounded-pill py-2" title="Clear Filters">
+            Reset
+          </a>
+        {% endif %}
+      </div>
+    </form>
+  </div>
+
+  <!-- Information Callout -->
+  <div class="p-3 bg-cream rounded-3 border mb-4 d-flex flex-column flex-md-row justify-content-between align-items-md-center gap-2">
+    <div class="d-flex align-items-center gap-2 small">
+      <i data-lucide="info" class="text-forest" style="width: 18px; height: 18px;"></i>
+      <span class="text-charcoal">
+        Showing <strong>{{ total_count }}</strong> verified available surplus food listing(s). All listings are sorted chronologically by earliest expiry.
+      </span>
+    </div>
+    <div class="small">
+      <a href="{{ url_for('auth.login') }}" class="text-forest fw-semibold text-decoration-none">
+        Community Pantry? Sign In to Claim &rarr;
+      </a>
+    </div>
+  </div>
+
+  <!-- Catalog Grid -->
+  {% if listings %}
+    <div class="row g-4">
+      {% for item in listings %}
+        <div class="col-md-6 col-lg-4">
+          <div class="card h-100 rounded-4 border-0 shadow-sm bg-surface d-flex flex-column position-relative overflow-hidden">
+            <!-- Top Status Stripe -->
+            <div class="py-1 px-3 d-flex justify-content-between align-items-center bg-cream border-bottom">
+              <span class="badge bg-sage-light text-forest font-monospace" style="font-size: 0.72rem;">{{ item.listing_id }}</span>
+              <span class="badge bg-leaf text-white" style="font-size: 0.72rem;">Available for Rescue</span>
+            </div>
+
+            <div class="card-body p-4 d-flex flex-column">
+              <div class="d-flex justify-content-between align-items-start mb-2">
+                <span class="badge bg-forest text-white">{{ item.category }}</span>
+                <span class="badge bg-cream text-forest border small">{{ item.food_condition }}</span>
+              </div>
+
+              <h5 class="font-heading fw-bold text-forest mb-2">{{ item.food_name }}</h5>
+
+              <div class="p-3 bg-cream rounded-3 border mb-3">
+                <div class="d-flex justify-content-between mb-1">
+                  <span class="small text-muted">Surplus Available:</span>
+                  <strong class="text-charcoal">{{ item.quantity }} {{ item.unit }}</strong>
+                </div>
+                {% if item.storage_requirements %}
+                  <div class="d-flex justify-content-between">
+                    <span class="small text-muted">Handling:</span>
+                    <small class="text-charcoal text-end text-truncate" style="max-width: 140px;">{{ item.storage_requirements }}</small>
+                  </div>
+                {% endif %}
+              </div>
+
+              <div class="small text-muted mb-2">
+                <i data-lucide="map-pin" class="text-terracotta me-1" style="width: 14px; height: 14px;"></i>
+                Location: <span class="text-charcoal">{{ item.pickup_location }}</span>
+              </div>
+
+              <div class="small text-muted mb-4">
+                <i data-lucide="clock" class="text-forest me-1" style="width: 14px; height: 14px;"></i>
+                Safe Pickup Deadline:
+                <span data-expiry-timestamp="{{ item.expiry_at }}" class="badge badge-{{ item.expiry_at|expiry_status }} ms-1">
+                  {{ item.expiry_at|time_ago }}
+                </span>
+                <div class="mt-1 ps-3 text-muted" style="font-size: 0.75rem;">
+                  {{ item.expiry_at|format_datetime }}
+                </div>
+              </div>
+
+              <!-- Read-only public action -->
+              <div class="mt-auto pt-3 border-top d-flex justify-content-between align-items-center">
+                <span class="small text-muted">Public Access: Read-Only</span>
+                <a href="{{ url_for('auth.login') }}" class="btn btn-sm btn-outline-forest rounded-pill px-3">
+                  <i data-lucide="lock" style="width: 13px; height: 13px;" class="me-1"></i> Claim Food
+                </a>
+              </div>
+            </div>
+          </div>
+        </div>
+      {% endfor %}
+    </div>
+  {% else %}
+    <div class="card rounded-4 border-0 shadow-sm bg-surface p-5 text-center">
+      <div class="d-inline-flex p-3 rounded-circle bg-sage-light text-forest mx-auto mb-3" style="width: 64px; height: 64px; display: flex; align-items: center; justify-content: center;">
+        <i data-lucide="package-open" style="width: 32px; height: 32px;"></i>
+      </div>
+      <h4 class="font-heading fw-bold text-forest mb-2">No Matching Food Listings</h4>
+      <p class="text-muted small max-w-700 mx-auto mb-4" style="max-width: 500px;">
+        There are currently no surplus food donations matching your search or filter criteria. All registered items may have already been allocated or rescued.
+      </p>
+      <div>
+        <a href="{{ url_for('public.available_food') }}" class="btn btn-leaf rounded-pill px-4">
+          Reset All Filters
+        </a>
+      </div>
+    </div>
+  {% endif %}
+</div>
+{% endblock %}

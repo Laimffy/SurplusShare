@@ -1,0 +1,192 @@
+<header class="app-header">
+  <div class="header-left d-flex align-items-center">
+    <button id="sidebarToggle" class="header-toggle-btn d-lg-none" type="button" aria-label="Open menu">
+      <i data-lucide="menu"></i>
+    </button>
+    <div class="header-title-box">
+      <h1 class="header-title">{% block page_title %}Dashboard{% endblock %}</h1>
+    </div>
+  </div>
+
+  <div class="header-right d-flex align-items-center gap-2 gap-md-3">
+    <!-- Quick Search Field -->
+    <div class="header-search-wrap d-none d-md-block">
+      <form action="{{ url_for('search.search_page') }}" method="POST">
+        <input type="hidden" name="search_mode" value="text">
+        <div class="header-search-input-group">
+          <i data-lucide="search" class="header-search-icon"></i>
+          <input type="text" name="query" class="header-search-input" placeholder="Search surplus items..." aria-label="Search">
+        </div>
+      </form>
+    </div>
+
+    <!-- Expiry Alert Bell Indicator (Admin & Donor) -->
+    {% if current_user.role in ('admin', 'donor') %}
+      <a href="{{ url_for('monitoring.monitoring_page') }}" class="header-icon-btn position-relative" title="Expiry Monitoring Alerts">
+        <i data-lucide="bell"></i>
+        <span class="header-alert-dot"></span>
+      </a>
+    {% endif %}
+
+    <!-- Quick Action CTA (Role-Aware) -->
+    {% if current_user.is_authenticated %}
+      {% if current_user.role in ('donor', 'admin') %}
+        <a href="{{ url_for('listings.new_listing') }}" class="btn btn-sm btn-leaf rounded-pill px-3 d-none d-sm-inline-flex align-items-center">
+          <i data-lucide="plus" class="me-1" style="width: 15px; height: 15px;"></i> Post Food
+        </a>
+      {% elif current_user.role == 'recipient' %}
+        <a href="{{ url_for('requests_bp.new_request') }}" class="btn btn-sm btn-leaf rounded-pill px-3 d-none d-sm-inline-flex align-items-center">
+          <i data-lucide="plus" class="me-1" style="width: 15px; height: 15px;"></i> Request Food
+        </a>
+      {% elif current_user.role == 'volunteer' %}
+        <a href="{{ url_for('schedule.list_schedules') }}" class="btn btn-sm btn-leaf rounded-pill px-3 d-none d-sm-inline-flex align-items-center">
+          <i data-lucide="truck" class="me-1" style="width: 15px; height: 15px;"></i> My Pickups
+        </a>
+      {% endif %}
+    {% endif %}
+
+    <!-- User Profile & Authentication State -->
+    <div class="header-user-badge d-flex align-items-center ps-2 border-start">
+      {% if current_user.is_authenticated %}
+        <div class="dropdown">
+          <button class="header-profile-btn d-flex align-items-center gap-2 border-0 bg-transparent p-1" 
+                  type="button" 
+                  id="headerUserDropdown" 
+                  data-bs-toggle="dropdown" 
+                  aria-expanded="false" 
+                  aria-label="User account menu for {{ current_user.display_name }}">
+            <div class="d-none d-md-block text-end lh-sm">
+              <span class="d-block fw-semibold text-charcoal small text-truncate" style="max-width: 170px;">
+                {{ current_user.organization or current_user.display_name }}
+              </span>
+              <span class="text-muted text-capitalize d-inline-flex align-items-center" style="font-size: 0.72rem;">
+                {{ current_user.role }}
+                {% if current_user.is_demo_user %}
+                  <span class="badge bg-gold text-white ms-1" style="font-size: 0.6rem; padding: 1px 5px;">Demo</span>
+                {% endif %}
+              </span>
+            </div>
+            <div class="header-user-avatar" title="{{ current_user.display_name }} ({{ current_user.role|capitalize }})">
+              {{ current_user.display_name[:2].upper() if current_user.display_name else (current_user.username[:2].upper() if current_user.username else 'US') }}
+            </div>
+          </button>
+          
+          <ul class="dropdown-menu dropdown-menu-end shadow-sm border-0 rounded-3 py-2 header-dropdown-menu" 
+              aria-labelledby="headerUserDropdown" 
+              style="min-width: 240px;">
+            <li class="px-3 py-2 border-bottom mb-1 bg-cream-light rounded-top">
+              <span class="d-block fw-bold text-forest small text-truncate">{{ current_user.display_name }}</span>
+              {% if current_user.organization and current_user.organization != current_user.display_name %}
+                <span class="d-block text-muted small text-truncate" style="font-size: 0.78rem;">{{ current_user.organization }}</span>
+              {% endif %}
+              <div class="d-flex align-items-center justify-content-between mt-1">
+                <span class="badge bg-sage text-forest text-capitalize" style="font-size: 0.7rem;">{{ current_user.role }}</span>
+                {% if current_user.is_demo_user %}
+                  <span class="badge bg-gold text-white" style="font-size: 0.65rem;">Demo Account</span>
+                {% endif %}
+              </div>
+            </li>
+            
+            <!-- My Profile / Role Dashboard Link -->
+            {% if current_user.role == 'admin' %}
+              <li>
+                <a class="dropdown-item py-2 d-flex align-items-center" href="{{ url_for('admin.dashboard') }}">
+                  <i data-lucide="shield" class="me-2 text-forest" style="width: 16px; height: 16px;"></i>
+                  <span>Admin Dashboard</span>
+                </a>
+              </li>
+              <li>
+                <a class="dropdown-item py-2 d-flex align-items-center" href="{{ url_for('admin.users') }}">
+                  <i data-lucide="users" class="me-2 text-forest" style="width: 16px; height: 16px;"></i>
+                  <span>User Management</span>
+                </a>
+              </li>
+              <li>
+                <a class="dropdown-item py-2 d-flex align-items-center" href="{{ url_for('settings.settings_page') }}">
+                  <i data-lucide="settings" class="me-2 text-forest" style="width: 16px; height: 16px;"></i>
+                  <span>System Settings</span>
+                </a>
+              </li>
+            {% elif current_user.role == 'donor' %}
+              <li>
+                <a class="dropdown-item py-2 d-flex align-items-center" href="{{ url_for('main.donor_dashboard') }}">
+                  <i data-lucide="layout-dashboard" class="me-2 text-forest" style="width: 16px; height: 16px;"></i>
+                  <span>Donation Dashboard</span>
+                </a>
+              </li>
+              <li>
+                <a class="dropdown-item py-2 d-flex align-items-center" href="{{ url_for('listings.list_listings') }}">
+                  <i data-lucide="package" class="me-2 text-forest" style="width: 16px; height: 16px;"></i>
+                  <span>My Food Listings</span>
+                </a>
+              </li>
+              <li>
+                <a class="dropdown-item py-2 d-flex align-items-center" href="{{ url_for('schedule.list_schedules') }}">
+                  <i data-lucide="truck" class="me-2 text-forest" style="width: 16px; height: 16px;"></i>
+                  <span>Pickups &amp; Handover</span>
+                </a>
+              </li>
+            {% elif current_user.role == 'recipient' %}
+              <li>
+                <a class="dropdown-item py-2 d-flex align-items-center" href="{{ url_for('main.recipient_dashboard') }}">
+                  <i data-lucide="layout-dashboard" class="me-2 text-forest" style="width: 16px; height: 16px;"></i>
+                  <span>Recipient Dashboard</span>
+                </a>
+              </li>
+              <li>
+                <a class="dropdown-item py-2 d-flex align-items-center" href="{{ url_for('requests_bp.list_requests') }}">
+                  <i data-lucide="heart-handshake" class="me-2 text-forest" style="width: 16px; height: 16px;"></i>
+                  <span>My Food Requests</span>
+                </a>
+              </li>
+              <li>
+                <a class="dropdown-item py-2 d-flex align-items-center" href="{{ url_for('public.available_food') }}">
+                  <i data-lucide="shopping-bag" class="me-2 text-forest" style="width: 16px; height: 16px;"></i>
+                  <span>Available Food Catalog</span>
+                </a>
+              </li>
+            {% elif current_user.role == 'volunteer' %}
+              <li>
+                <a class="dropdown-item py-2 d-flex align-items-center" href="{{ url_for('main.volunteer_dashboard') }}">
+                  <i data-lucide="layout-dashboard" class="me-2 text-forest" style="width: 16px; height: 16px;"></i>
+                  <span>Pickup Dashboard</span>
+                </a>
+              </li>
+              <li>
+                <a class="dropdown-item py-2 d-flex align-items-center" href="{{ url_for('schedule.list_schedules') }}">
+                  <i data-lucide="truck" class="me-2 text-forest" style="width: 16px; height: 16px;"></i>
+                  <span>Assigned Route Stops</span>
+                </a>
+              </li>
+            {% endif %}
+
+            <li>
+              <a class="dropdown-item py-2 d-flex align-items-center" href="{{ url_for('public.home') }}" target="_blank">
+                <i data-lucide="external-link" class="me-2 text-muted" style="width: 16px; height: 16px;"></i>
+                <span>Public Website</span>
+              </a>
+            </li>
+
+            <li><hr class="dropdown-divider my-1"></li>
+
+            <li>
+              <a class="dropdown-item py-2 text-danger d-flex align-items-center" href="{{ url_for('auth.logout') }}">
+                <i data-lucide="log-out" class="me-2" style="width: 16px; height: 16px;"></i>
+                <span>Sign Out</span>
+              </a>
+            </li>
+          </ul>
+        </div>
+      {% else %}
+        <div class="d-flex align-items-center gap-2">
+          <a href="{{ url_for('auth.login') }}" class="btn btn-sm btn-outline-forest rounded-pill px-3">
+            <i data-lucide="log-in" class="me-1" style="width: 14px; height: 14px;"></i> Sign In
+          </a>
+          <a href="{{ url_for('auth.login', tab='register') }}" class="btn btn-sm btn-leaf rounded-pill px-3 d-none d-sm-inline-flex">
+            <i data-lucide="user-plus" class="me-1" style="width: 14px; height: 14px;"></i> Register
+          </a>
+        </div>
+      {% endif %}
+    </div>
+  </div>
+</header>

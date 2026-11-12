@@ -1,0 +1,134 @@
+{% extends "public/base.html" %}
+
+{% block title %}Contact Us — SurplusShare — Food Waste Reallocation System{% endblock %}
+
+{% block content %}
+<!-- Header -->
+<div class="bg-forest text-white py-5">
+  <div class="container text-center">
+    <span class="badge bg-leaf text-white rounded-pill px-3 py-1 mb-2 font-monospace text-uppercase" style="font-size: 0.75rem;">
+      Get in Touch
+    </span>
+    <h1 class="font-heading display-5 fw-bold mb-2">Contact Us</h1>
+    <p class="fs-6 text-white-50 max-w-700 mx-auto mb-0" style="max-width: 680px;">
+      Whether you represent a food establishment, coordinate a feeding program, or wish to volunteer as a driver, our project team is here to assist you.
+    </p>
+  </div>
+</div>
+
+<div class="container py-5">
+  <div class="row g-5">
+    <!-- Left Column: Official Contact Information -->
+    <div class="col-lg-5">
+      <h3 class="font-heading fw-bold text-forest mb-3">Project Headquarters</h3>
+      <p class="text-charcoal small mb-4">
+        SurplusShare operates out of Metro Manila, coordinating daily food rescue runs, community pantry requests, and food hygiene safety checks.
+      </p>
+
+      <div class="d-flex flex-column gap-3 mb-4">
+        <div class="p-3 bg-surface rounded-3 border shadow-sm d-flex align-items-start gap-3">
+          <div class="p-2 rounded-circle bg-sage-light text-forest flex-shrink-0" style="width: 40px; height: 40px; display: flex; align-items: center; justify-content: center;">
+            <i data-lucide="map-pin" style="width: 20px; height: 20px;"></i>
+          </div>
+          <div>
+            <strong class="text-forest small d-block">Physical Hub &amp; Coordination Desk</strong>
+            <span class="text-charcoal small">
+              SurplusShare Food Rescue Hub<br>
+              Maginhawa St., Diliman, Quezon City<br>
+              Metro Manila 1101, Philippines
+            </span>
+          </div>
+        </div>
+
+        <div class="p-3 bg-surface rounded-3 border shadow-sm d-flex align-items-start gap-3">
+          <div class="p-2 rounded-circle bg-sage-light text-forest flex-shrink-0" style="width: 40px; height: 40px; display: flex; align-items: center; justify-content: center;">
+            <i data-lucide="mail" style="width: 20px; height: 20px;"></i>
+          </div>
+          <div>
+            <strong class="text-forest small d-block">Official Email Desks</strong>
+            <span class="text-charcoal small">
+              General Inquiries: <a href="mailto:contact@surplusshare.ph" class="text-forest">contact@surplusshare.ph</a><br>
+              Partnerships: <a href="mailto:partnerships@surplusshare.ph" class="text-forest">partnerships@surplusshare.ph</a>
+            </span>
+          </div>
+        </div>
+
+        <div class="p-3 bg-surface rounded-3 border shadow-sm d-flex align-items-start gap-3">
+          <div class="p-2 rounded-circle bg-sage-light text-forest flex-shrink-0" style="width: 40px; height: 40px; display: flex; align-items: center; justify-content: center;">
+            <i data-lucide="phone" style="width: 20px; height: 20px;"></i>
+          </div>
+          <div>
+            <strong class="text-forest small d-block">Telephone &amp; Hotline</strong>
+            <span class="text-charcoal small">
+              Landline: +63 (2) 8920-5301<br>
+              Mobile / Emergency Rescue: +63 917 123 4567
+            </span>
+          </div>
+        </div>
+
+        <div class="p-3 bg-surface rounded-3 border shadow-sm d-flex align-items-start gap-3">
+          <div class="p-2 rounded-circle bg-sage-light text-forest flex-shrink-0" style="width: 40px; height: 40px; display: flex; align-items: center; justify-content: center;">
+            <i data-lucide="clock" style="width: 20px; height: 20px;"></i>
+          </div>
+          <div>
+            <strong class="text-forest small d-block">Operating Hours</strong>
+            <span class="text-charcoal small">
+              Monday &ndash; Saturday: 7:00 AM &ndash; 8:00 PM PHT<br>
+              Sunday: 8:00 AM &ndash; 5:00 PM (Emergency Dispatch)
+            </span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Right Column: Interactive Contact Form -->
+    <div class="col-lg-7">
+      <div class="card rounded-4 border-0 shadow-sm bg-surface p-4 p-md-5">
+        <h3 class="font-heading fw-bold text-forest mb-2">Send an Inquiry or Partner Request</h3>
+        <p class="text-muted small mb-4">
+          Fill out the form below. Your message will be reviewed and logged by our project coordination team.
+        </p>
+
+        <form method="POST" action="{{ url_for('public.contact') }}">
+          <div class="row g-3 mb-3">
+            <div class="col-md-6">
+              <label for="name" class="form-label small fw-semibold text-charcoal">Your Full Name <span class="text-danger">*</span></label>
+              <input type="text" class="form-control" id="name" name="name" placeholder="e.g. Maria Santos" required>
+            </div>
+            <div class="col-md-6">
+              <label for="email" class="form-label small fw-semibold text-charcoal">Email Address <span class="text-danger">*</span></label>
+              <input type="email" class="form-control" id="email" name="email" placeholder="e.g. maria@example.ph" required>
+            </div>
+          </div>
+
+          <div class="mb-3">
+            <label for="organization" class="form-label small fw-semibold text-charcoal">Organization / Business Name (Optional)</label>
+            <input type="text" class="form-control" id="organization" name="organization" placeholder="e.g. Sunrise Bakery, Hope Feeding Program">
+          </div>
+
+          <div class="mb-3">
+            <label for="subject" class="form-label small fw-semibold text-charcoal">Inquiry Subject <span class="text-danger">*</span></label>
+            <select class="form-select" id="subject" name="subject" required>
+              <option value="">Select a topic...</option>
+              <option value="Food Donor Partnership">Food Donor Partnership (Restaurant / Bakery / Grocery)</option>
+              <option value="Community Pantry Registration">Community Pantry / Feeding Program Registration</option>
+              <option value="Volunteer Courier Program">Volunteer Courier / Driver Participation</option>
+              <option value="Technical & Academic Inquiry">Technical &amp; Academic DSA Inquiry</option>
+              <option value="General Feedback">General Feedback &amp; Other</option>
+            </select>
+          </div>
+
+          <div class="mb-4">
+            <label for="message" class="form-label small fw-semibold text-charcoal">Message Details <span class="text-danger">*</span></label>
+            <textarea class="form-control" id="message" name="message" rows="5" placeholder="Please describe your establishment, community feeding needs, or how you would like to collaborate..." required></textarea>
+          </div>
+
+          <button type="submit" class="btn btn-leaf btn-lg rounded-pill w-100 shadow-sm">
+            <i data-lucide="send" class="me-1"></i> Submit Message
+          </button>
+        </form>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}

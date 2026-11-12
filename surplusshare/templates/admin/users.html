@@ -1,0 +1,137 @@
+{% extends "base.html" %}
+
+{% block title %}User Management — SurplusShare Admin{% endblock %}
+{% block page_title %}User Management &amp; RBAC{% endblock %}
+
+{% block content %}
+<div class="admin-users-container">
+  <!-- Header Bar -->
+  <div class="card rounded-3 shadow-sm border-0 mb-4 bg-surface">
+    <div class="card-body p-3 d-flex flex-column flex-md-row justify-content-between align-items-md-center gap-3">
+      <!-- Role Filter -->
+      <div class="d-flex align-items-center gap-2">
+        <span class="small fw-semibold text-muted">Filter Role:</span>
+        <div class="btn-group btn-group-sm">
+          <a href="{{ url_for('admin.users') }}" class="btn btn-sm {% if not role_filter %}btn-forest text-white{% else %}btn-outline-forest{% endif %} rounded-pill">All</a>
+          <a href="{{ url_for('admin.users', role='admin') }}" class="btn btn-sm {% if role_filter == 'admin' %}btn-forest text-white{% else %}btn-outline-forest{% endif %} rounded-pill">Admin</a>
+          <a href="{{ url_for('admin.users', role='donor') }}" class="btn btn-sm {% if role_filter == 'donor' %}btn-forest text-white{% else %}btn-outline-forest{% endif %} rounded-pill">Donor</a>
+          <a href="{{ url_for('admin.users', role='recipient') }}" class="btn btn-sm {% if role_filter == 'recipient' %}btn-forest text-white{% else %}btn-outline-forest{% endif %} rounded-pill">Recipient</a>
+          <a href="{{ url_for('admin.users', role='volunteer') }}" class="btn btn-sm {% if role_filter == 'volunteer' %}btn-forest text-white{% else %}btn-outline-forest{% endif %} rounded-pill">Volunteer</a>
+        </div>
+      </div>
+
+      <!-- Add User Modal Button -->
+      <button type="button" class="btn btn-sm btn-leaf rounded-pill px-3 shadow-sm" data-bs-toggle="modal" data-bs-target="#addUserModal">
+        <i data-lucide="user-plus" class="me-1" style="width: 14px; height: 14px;"></i> Add System User
+      </button>
+    </div>
+  </div>
+
+  <!-- Users Table -->
+  <div class="card rounded-3 shadow-sm border-0 bg-surface">
+    <div class="card-body p-0">
+      <div class="table-responsive">
+        <table class="table table-hover align-middle mb-0 custom-table">
+          <thead class="table-light small text-muted text-uppercase">
+            <tr>
+              <th>ID</th>
+              <th>Username</th>
+              <th>Display Name</th>
+              <th>Organization</th>
+              <th>Email</th>
+              <th>Role</th>
+              <th>Registered</th>
+              <th class="text-end">Actions</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for u in users %}
+              <tr>
+                <td class="font-monospace small text-muted">{{ u.id }}</td>
+                <td><strong class="text-forest">{{ u.username }}</strong></td>
+                <td>{{ u.display_name }}</td>
+                <td class="small text-muted">{{ u.organization or '—' }}</td>
+                <td class="small text-muted">{{ u.email or '—' }}</td>
+                <td>
+                  <form method="POST" action="{{ url_for('admin.update_user_role', user_id=u.id) }}" class="d-inline">
+                    <select name="role" class="form-select form-select-sm py-0 px-2 d-inline-block w-auto" onchange="this.form.submit()" style="font-size: 0.78rem;">
+                      <option value="admin" {% if u.role == 'admin' %}selected{% endif %}>Admin</option>
+                      <option value="donor" {% if u.role == 'donor' %}selected{% endif %}>Donor</option>
+                      <option value="recipient" {% if u.role == 'recipient' %}selected{% endif %}>Recipient</option>
+                      <option value="volunteer" {% if u.role == 'volunteer' %}selected{% endif %}>Volunteer</option>
+                    </select>
+                  </form>
+                </td>
+                <td class="small text-muted">{{ u.created_at|time_ago }}</td>
+                <td class="text-end">
+                  {% if u.id != current_user.id %}
+                    <form method="POST" action="{{ url_for('admin.delete_user', user_id=u.id) }}" data-confirm="Delete user '{{ u.username }}'? This cannot be undone." class="d-inline">
+                      <button type="submit" class="btn btn-sm btn-outline-danger py-0 px-2" title="Delete User">
+                        <i data-lucide="trash-2" style="width: 13px; height: 13px;"></i>
+                      </button>
+                    </form>
+                  {% else %}
+                    <span class="badge bg-light text-muted small">Current</span>
+                  {% endif %}
+                </td>
+              </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Modal: Add New User -->
+<div class="modal fade" id="addUserModal" tabindex="-1" aria-labelledby="addUserModalLabel" aria-hidden="true">
+  <div class="modal-dialog">
+    <div class="modal-content rounded-3 border-0">
+      <div class="modal-header bg-forest text-white">
+        <h5 class="modal-title font-heading" id="addUserModalLabel">
+          <i data-lucide="user-plus" class="me-1"></i> Add System User
+        </h5>
+        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <form method="POST" action="{{ url_for('admin.create_user') }}">
+        <div class="modal-body p-4">
+          <div class="mb-3">
+            <label for="username" class="form-label small fw-semibold">Username <span class="text-danger">*</span></label>
+            <input type="text" class="form-control" id="username" name="username" placeholder="e.g. makati_kitchen" required>
+          </div>
+          <div class="mb-3">
+            <label for="display_name" class="form-label small fw-semibold">Display / Contact Name <span class="text-danger">*</span></label>
+            <input type="text" class="form-control" id="display_name" name="display_name" placeholder="e.g. Chef Juan Dela Cruz" required>
+          </div>
+          <div class="mb-3">
+            <label for="email" class="form-label small fw-semibold">Email Address <span class="text-danger">*</span></label>
+            <input type="email" class="form-control" id="email" name="email" placeholder="e.g. contact@makatikitchen.ph" required>
+          </div>
+          <div class="mb-3">
+            <label for="role" class="form-label small fw-semibold">System Role <span class="text-danger">*</span></label>
+            <select class="form-select" id="role" name="role" required>
+              <option value="donor">Donor (Restaurant, Bakery, Grocer)</option>
+              <option value="recipient">Recipient (Community Pantry, Shelter)</option>
+              <option value="volunteer">Volunteer (Pickup Driver)</option>
+              <option value="admin">Administrator (Full Access)</option>
+            </select>
+          </div>
+          <div class="mb-3">
+            <label for="organization" class="form-label small fw-semibold">Organization / Establishment</label>
+            <input type="text" class="form-control" id="organization" name="organization" placeholder="e.g. Makati Community Kitchen">
+          </div>
+          <div class="mb-3">
+            <label for="password" class="form-label small fw-semibold">Initial Password</label>
+            <input type="password" class="form-control" id="password" name="password" value="password123" required>
+            <small class="form-text text-muted">Default is <code>password123</code></small>
+          </div>
+        </div>
+        <div class="modal-footer bg-light">
+          <button type="button" class="btn btn-outline-secondary rounded-pill" data-bs-dismiss="modal">Cancel</button>
+          <button type="submit" class="btn btn-leaf rounded-pill px-4">Create User</button>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
+{% endblock %}

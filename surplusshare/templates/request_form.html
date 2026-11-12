@@ -1,0 +1,83 @@
+{% extends "base.html" %}
+
+{% block title %}Submit Recipient Food Request — SurplusShare{% endblock %}
+{% block page_title %}Food Assistance Request{% endblock %}
+
+{% block content %}
+<div class="form-container" style="max-width: 750px; margin: 0 auto;">
+  <!-- Breadcrumb -->
+  <nav aria-label="breadcrumb" class="mb-4">
+    <ol class="breadcrumb">
+      <li class="breadcrumb-item"><a href="{{ url_for('requests_bp.list_requests') }}" class="text-forest text-decoration-none">Recipient Requests</a></li>
+      <li class="breadcrumb-item active" aria-current="page">New Request</li>
+    </ol>
+  </nav>
+
+  <div class="card rounded-3 shadow-sm border-0 bg-surface">
+    <div class="card-header bg-forest text-white p-3 p-md-4 rounded-top-3">
+      <div class="d-flex align-items-center">
+        <i data-lucide="heart-handshake" class="me-2" style="width: 24px; height: 24px;"></i>
+        <h4 class="mb-0 fw-bold font-heading">Submit Food Request to FIFO Queue</h4>
+      </div>
+      <p class="mb-0 small text-sage-light mt-1">
+        Community pantries, feeding programs, and shelters are matched in order of request submission.
+      </p>
+    </div>
+
+    <div class="card-body p-4">
+      <form method="POST" action="{{ url_for('requests_bp.create_request_route') }}">
+        <!-- Row 1: Organization & Category -->
+        <div class="row g-3 mb-3">
+          <div class="col-md-7">
+            <label for="organization_name" class="form-label fw-semibold text-charcoal">Organization / Program Name <span class="text-danger">*</span></label>
+            <input type="text" class="form-control" id="organization_name" name="organization_name" value="{{ req.organization_name if req else '' }}" placeholder="e.g. Hope Feeding Program, Barangay Food Center" required>
+          </div>
+          <div class="col-md-5">
+            <label for="food_category" class="form-label fw-semibold text-charcoal">Food Category <span class="text-danger">*</span></label>
+            <select class="form-select" id="food_category" name="food_category" required>
+              <option value="">Select Category</option>
+              {% for cat in categories %}
+                <option value="{{ cat }}" {% if req and req.food_category == cat %}selected{% endif %}>{{ cat }}</option>
+              {% endfor %}
+            </select>
+          </div>
+        </div>
+
+        <!-- Row 2: Quantity & Unit -->
+        <div class="row g-3 mb-3">
+          <div class="col-md-6">
+            <label for="requested_quantity" class="form-label fw-semibold text-charcoal">Quantity Needed <span class="text-danger">*</span></label>
+            <input type="number" step="0.1" min="0.1" class="form-control" id="requested_quantity" name="requested_quantity" value="{{ req.requested_quantity if req else '' }}" placeholder="e.g. 25" required>
+          </div>
+          <div class="col-md-6">
+            <label for="quantity_unit" class="form-label fw-semibold text-charcoal">Quantity Unit <span class="text-danger">*</span></label>
+            <select class="form-select" id="quantity_unit" name="quantity_unit" required>
+              <option value="">Select Unit</option>
+              {% for u in ['pieces', 'kg', 'liters', 'packs', 'boxes', 'trays', 'bags'] %}
+                <option value="{{ u }}" {% if req and req.quantity_unit == u %}selected{% endif %}>{{ u }}</option>
+              {% endfor %}
+            </select>
+          </div>
+        </div>
+
+        <!-- Row 3: Shelf Life Requirement -->
+        <div class="mb-4">
+          <label for="min_shelf_life_hours" class="form-label fw-semibold text-charcoal">Minimum Acceptable Shelf Life (Hours)</label>
+          <input type="number" step="1" min="0" class="form-control" id="min_shelf_life_hours" name="min_shelf_life_hours" value="{{ req.min_shelf_life_hours if req else '0' }}">
+          <small class="form-text text-muted">
+            Set to 0 if your organization can accept same-day urgent food, or specify hours (e.g. 12 or 24) if your distribution schedule requires more preparation time.
+          </small>
+        </div>
+
+        <!-- Actions -->
+        <div class="d-flex justify-content-end gap-2 pt-3 border-top">
+          <a href="{{ url_for('requests_bp.list_requests') }}" class="btn btn-outline-secondary rounded-pill px-4">Cancel</a>
+          <button type="submit" class="btn btn-leaf rounded-pill px-4 shadow-sm">
+            <i data-lucide="check" class="me-1"></i> Enqueue Request
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
+{% endblock %}

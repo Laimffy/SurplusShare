@@ -1,0 +1,108 @@
+{% extends "public/base.html" %}
+
+{% block title %}Frequently Asked Questions (FAQs) — SurplusShare{% endblock %}
+
+{% block content %}
+<!-- Header -->
+<div class="bg-forest text-white py-5">
+  <div class="container text-center">
+    <span class="badge bg-leaf text-white rounded-pill px-3 py-1 mb-2 font-monospace text-uppercase" style="font-size: 0.75rem;">
+      Help Center &amp; Guidelines
+    </span>
+    <h1 class="font-heading display-5 fw-bold mb-2">Frequently Asked Questions</h1>
+    <p class="fs-6 text-white-50 max-w-700 mx-auto mb-0" style="max-width: 680px;">
+      Find answers on how to donate surplus food, register a community pantry, understand our matching algorithms, and participate in volunteer pickup routes.
+    </p>
+  </div>
+</div>
+
+<div class="container py-5" style="max-width: 900px;">
+  <!-- Category Filter Pills -->
+  <div class="d-flex flex-wrap gap-2 justify-content-center mb-5">
+    <button type="button" class="btn btn-sm btn-forest rounded-pill px-3 faq-filter-btn active" data-category="all">
+      All Questions
+    </button>
+    {% for cat in categorized_faqs.keys() %}
+      <button type="button" class="btn btn-sm btn-outline-forest rounded-pill px-3 faq-filter-btn" data-category="{{ cat|lower|replace(' ', '-')|replace('&', 'and') }}">
+        {{ cat }}
+      </button>
+    {% endfor %}
+  </div>
+
+  <!-- FAQs Accordion Grouped by Category -->
+  <div class="accordion" id="faqAccordion">
+    {% set global_index = 0 %}
+    {% for cat, faqs in categorized_faqs.items() %}
+      <div class="faq-category-block mb-4" data-cat-id="{{ cat|lower|replace(' ', '-')|replace('&', 'and') }}">
+        <h4 class="font-heading fw-bold text-forest mb-3 d-flex align-items-center gap-2">
+          <i data-lucide="help-circle" class="text-leaf" style="width: 22px; height: 22px;"></i>
+          {{ cat }}
+        </h4>
+
+        <div class="d-flex flex-column gap-3">
+          {% for faq in faqs %}
+            {% set item_id = 'faq_' ~ loop.index0 ~ '_' ~ cat|lower|replace(' ', '_')|replace('&', 'and') %}
+            <div class="card rounded-3 border-0 shadow-sm bg-surface overflow-hidden">
+              <div class="card-header bg-transparent p-0 border-0">
+                <button class="accordion-button collapsed py-3 px-4 fw-semibold text-forest bg-surface" type="button" data-bs-toggle="collapse" data-bs-target="#{{ item_id }}" aria-expanded="false" aria-controls="{{ item_id }}">
+                  {{ faq.question }}
+                </button>
+              </div>
+              <div id="{{ item_id }}" class="accordion-collapse collapse" data-bs-parent="#faqAccordion">
+                <div class="card-body p-4 pt-1 text-charcoal small border-top bg-cream">
+                  {{ faq.answer }}
+                </div>
+              </div>
+            </div>
+          {% endfor %}
+        </div>
+      </div>
+    {% endfor %}
+  </div>
+
+  <!-- Still Have Questions Callout -->
+  <div class="card rounded-4 border-0 bg-surface p-4 p-md-5 mt-5 text-center shadow-sm">
+    <div class="d-inline-flex p-3 rounded-circle bg-sage-light text-forest mx-auto mb-3" style="width: 54px; height: 54px; display: flex; align-items: center; justify-content: center;">
+      <i data-lucide="message-square" style="width: 26px; height: 26px;"></i>
+    </div>
+    <h4 class="font-heading fw-bold text-forest mb-2">Still Have Questions?</h4>
+    <p class="text-muted small max-w-700 mx-auto mb-4" style="max-width: 500px;">
+      Our team is available to assist food businesses, community pantries, and volunteers across Metro Manila.
+    </p>
+    <div>
+      <a href="{{ url_for('public.contact') }}" class="btn btn-leaf rounded-pill px-4">
+        Contact Project Desk
+      </a>
+    </div>
+  </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+  document.addEventListener('DOMContentLoaded', () => {
+    const filterBtns = document.querySelectorAll('.faq-filter-btn');
+    const categoryBlocks = document.querySelectorAll('.faq-category-block');
+
+    filterBtns.forEach(btn => {
+      btn.addEventListener('click', () => {
+        filterBtns.forEach(b => {
+          b.classList.remove('btn-forest', 'active');
+          b.classList.add('btn-outline-forest');
+        });
+        btn.classList.remove('btn-outline-forest');
+        btn.classList.add('btn-forest', 'active');
+
+        const cat = btn.getAttribute('data-category');
+        categoryBlocks.forEach(block => {
+          if (cat === 'all' || block.getAttribute('data-cat-id') === cat) {
+            block.style.display = '';
+          } else {
+            block.style.display = 'none';
+          }
+        });
+      });
+    });
+  });
+</script>
+{% endblock %}

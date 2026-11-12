@@ -1,0 +1,121 @@
+{% extends "base.html" %}
+
+{% block title %}Security Audit Logs — SurplusShare Admin{% endblock %}
+{% block page_title %}Security Audit &amp; Operations Log{% endblock %}
+
+{% block content %}
+<div class="admin-audit-container">
+  <!-- Top Stat Row -->
+  <div class="row g-3 mb-4">
+    <div class="col-md-4">
+      <div class="p-3 bg-surface rounded-3 border-start border-4 border-forest shadow-sm">
+        <span class="text-muted small text-uppercase">Total Security Events</span>
+        <h3 class="fw-bold text-forest mb-0 mt-1">{{ stats.total_events }}</h3>
+        <small class="text-muted">Recorded audit entries</small>
+      </div>
+    </div>
+    <div class="col-md-8">
+      <div class="p-3 bg-surface rounded-3 border shadow-sm">
+        <span class="text-muted small text-uppercase d-block mb-2">Top Logged Action Types:</span>
+        <div class="d-flex flex-wrap gap-2">
+          {% for a in stats.top_actions %}
+            <span class="badge bg-cream text-forest border">
+              {{ a.action }}: <strong class="text-charcoal">{{ a.count }}</strong>
+            </span>
+          {% endfor %}
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Filter & Search Toolbar -->
+  <div class="card rounded-3 shadow-sm border-0 mb-4 bg-surface">
+    <div class="card-body p-3">
+      <form method="GET" action="{{ url_for('admin.audit_logs') }}" class="row g-2 align-items-center">
+        <div class="col-md-4">
+          <input type="text" name="q" class="form-control form-control-sm" placeholder="Search by user, resource, or details..." value="{{ search_term or '' }}">
+        </div>
+        <div class="col-md-3">
+          <select name="action" class="form-select form-select-sm" onchange="this.form.submit()">
+            <option value="">All Action Types</option>
+            {% for a in stats.top_actions %}
+              <option value="{{ a.action }}" {% if action_filter == a.action %}selected{% endif %}>{{ a.action }}</option>
+            {% endfor %}
+          </select>
+        </div>
+        <div class="col-md-3">
+          <select name="role" class="form-select form-select-sm" onchange="this.form.submit()">
+            <option value="">All Roles</option>
+            <option value="admin" {% if role_filter == 'admin' %}selected{% endif %}>Admin</option>
+            <option value="donor" {% if role_filter == 'donor' %}selected{% endif %}>Donor</option>
+            <option value="recipient" {% if role_filter == 'recipient' %}selected{% endif %}>Recipient</option>
+            <option value="volunteer" {% if role_filter == 'volunteer' %}selected{% endif %}>Volunteer</option>
+            <option value="public" {% if role_filter == 'public' %}selected{% endif %}>Public / Anonymous</option>
+          </select>
+        </div>
+        <div class="col-md-2 d-flex gap-1">
+          <button type="submit" class="btn btn-sm btn-leaf rounded-pill w-100">Filter</button>
+          {% if action_filter or role_filter or search_term %}
+            <a href="{{ url_for('admin.audit_logs') }}" class="btn btn-sm btn-outline-secondary rounded-pill" title="Clear Filters">Reset</a>
+          {% endif %}
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- Audit Logs Table -->
+  <div class="card rounded-3 shadow-sm border-0 bg-surface">
+    <div class="card-body p-0">
+      {% if logs %}
+        <div class="table-responsive">
+          <table class="table table-hover align-middle mb-0 custom-table">
+            <thead class="table-light small text-muted text-uppercase">
+              <tr>
+                <th style="width: 150px;">Timestamp</th>
+                <th>Action</th>
+                <th>User / Role</th>
+                <th>Resource</th>
+                <th>Details</th>
+                <th>IP Address</th>
+              </tr>
+            </thead>
+            <tbody>
+              {% for log in logs %}
+                <tr>
+                  <td class="small text-muted font-monospace">
+                    {{ log.timestamp|format_datetime }}
+                  </td>
+                  <td>
+                    <span class="badge bg-sage text-forest font-monospace" style="font-size: 0.72rem;">
+                      {{ log.action }}
+                    </span>
+                  </td>
+                  <td>
+                    <strong class="text-charcoal small">{{ log.username }}</strong>
+                    <span class="badge bg-light text-muted border text-capitalize ms-1" style="font-size: 0.68rem;">{{ log.role }}</span>
+                  </td>
+                  <td>
+                    <span class="font-monospace small text-forest">{{ log.resource_type }}</span>
+                    {% if log.resource_id %}
+                      <small class="text-muted d-block font-monospace">#{{ log.resource_id }}</small>
+                    {% endif %}
+                  </td>
+                  <td>
+                    <small class="text-charcoal">{{ log.details or '—' }}</small>
+                  </td>
+                  <td class="font-monospace small text-muted">{{ log.ip_address or '—' }}</td>
+                </tr>
+              {% endfor %}
+            </tbody>
+          </table>
+        </div>
+      {% else %}
+        <div class="p-5 text-center text-muted">
+          <i data-lucide="shield-alert" class="text-sage mb-2" style="width: 48px; height: 48px;"></i>
+          <p class="mb-0">No security audit logs match the current filters.</p>
+        </div>
+      {% endif %}
+    </div>
+  </div>
+</div>
+{% endblock %}

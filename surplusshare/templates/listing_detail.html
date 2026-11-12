@@ -1,0 +1,193 @@
+{% extends "base.html" %}
+
+{% block title %}{{ listing.food_name }} ({{ listing.listing_id }}) — SurplusShare{% endblock %}
+{% block page_title %}Listing Details{% endblock %}
+
+{% block content %}
+<div class="listing-detail-container">
+  <!-- Breadcrumb -->
+  <nav aria-label="breadcrumb" class="mb-4">
+    <ol class="breadcrumb">
+      <li class="breadcrumb-item"><a href="{{ url_for('listings.list_listings') }}" class="text-forest text-decoration-none">Food Listings</a></li>
+      <li class="breadcrumb-item active" aria-current="page">{{ listing.listing_id }}</li>
+    </ol>
+  </nav>
+
+  <div class="row g-4">
+    <!-- Main Listing Info Card -->
+    <div class="col-lg-8">
+      <div class="card rounded-3 shadow-sm border-0 bg-surface mb-4">
+        <div class="card-header bg-transparent border-bottom py-3 d-flex justify-content-between align-items-center">
+          <div class="d-flex align-items-center">
+            <span class="badge bg-sage text-forest me-2">{{ listing.category }}</span>
+            <span class="font-monospace text-muted small">{{ listing.listing_id }}</span>
+          </div>
+          <div>
+            {% if listing.status == 'available' %}
+              <span class="badge bg-leaf text-white px-3 py-2">Available</span>
+            {% elif listing.status == 'partially_allocated' %}
+              <span class="badge bg-gold text-white px-3 py-2">Partially Allocated</span>
+            {% elif listing.status == 'fully_allocated' %}
+              <span class="badge bg-forest text-white px-3 py-2">Fully Rescued</span>
+            {% elif listing.status == 'expired' %}
+              <span class="badge bg-secondary text-white px-3 py-2">Expired</span>
+            {% else %}
+              <span class="badge bg-light text-dark px-3 py-2">{{ listing.status }}</span>
+            {% endif %}
+          </div>
+        </div>
+
+        <div class="card-body p-4">
+          <h2 class="card-title text-forest font-heading fw-bold mb-3">{{ listing.food_name }}</h2>
+
+          <div class="row g-3 mb-4">
+            <div class="col-sm-6 col-md-4">
+              <div class="p-3 bg-cream rounded-3 border">
+                <span class="text-muted small d-block mb-1">Total Quantity</span>
+                <span class="h4 fw-bold text-forest mb-0">{{ listing.quantity }} {{ listing.unit }}</span>
+              </div>
+            </div>
+            <div class="col-sm-6 col-md-4">
+              <div class="p-3 bg-cream rounded-3 border">
+                <span class="text-muted small d-block mb-1">Allocated to Date</span>
+                <span class="h4 fw-bold text-gold mb-0">{{ listing.allocated_quantity }} {{ listing.unit }}</span>
+              </div>
+            </div>
+            <div class="col-sm-6 col-md-4">
+              <div class="p-3 bg-cream rounded-3 border">
+                <span class="text-muted small d-block mb-1">Remaining Surplus</span>
+                <span class="h4 fw-bold text-leaf mb-0">{{ (listing.quantity - listing.allocated_quantity)|round(2) }} {{ listing.unit }}</span>
+              </div>
+            </div>
+          </div>
+
+          <div class="detail-section mb-4">
+            <h5 class="text-forest fw-bold font-heading border-bottom pb-2 mb-3">Donor &amp; Pickup Logistics</h5>
+            <dl class="row mb-0">
+              <dt class="col-sm-4 text-muted">Donor Organization</dt>
+              <dd class="col-sm-8 fw-semibold text-charcoal">{{ listing.donor_name }}</dd>
+
+              <dt class="col-sm-4 text-muted">Pickup Location</dt>
+              <dd class="col-sm-8 text-charcoal">
+                <i data-lucide="map-pin" class="text-terracotta me-1" style="width: 16px; height: 16px;"></i>
+                {{ listing.pickup_location }}
+              </dd>
+
+              <dt class="col-sm-4 text-muted">Food Condition</dt>
+              <dd class="col-sm-8">
+                <span class="badge bg-sage-light text-forest">{{ listing.food_condition }}</span>
+              </dd>
+
+              <dt class="col-sm-4 text-muted">Storage Requirements</dt>
+              <dd class="col-sm-8 text-charcoal">{{ listing.storage_requirements or 'None specified' }}</dd>
+
+              <dt class="col-sm-4 text-muted">Posted Timestamp</dt>
+              <dd class="col-sm-8 text-charcoal">{{ listing.posted_at|format_datetime }} ({{ listing.posted_at|time_ago }})</dd>
+            </dl>
+          </div>
+
+          <!-- Allocation History -->
+          <div class="detail-section">
+            <h5 class="text-forest fw-bold font-heading border-bottom pb-2 mb-3">Redistribution History</h5>
+            {% if allocations %}
+              <div class="table-responsive">
+                <table class="table table-sm table-hover align-middle">
+                  <thead class="table-light small text-muted">
+                    <tr>
+                      <th>Allocation ID</th>
+                      <th>Recipient Organization</th>
+                      <th>Quantity Allocated</th>
+                      <th>Status</th>
+                      <th>Date</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {% for a in allocations %}
+                      <tr>
+                        <td class="font-monospace small">{{ a.allocation_id }}</td>
+                        <td class="fw-semibold">{{ a.organization_name }}</td>
+                        <td>{{ a.allocated_quantity }} {{ listing.unit }}</td>
+                        <td>
+                          <span class="badge bg-sage text-forest">{{ a.status|capitalize }}</span>
+                        </td>
+                        <td class="small text-muted">{{ a.allocated_at|format_datetime }}</td>
+                      </tr>
+                    {% endfor %}
+                  </tbody>
+                </table>
+              </div>
+            {% else %}
+              <p class="text-muted small mb-0">No recipient allocations have been executed for this listing yet.</p>
+            {% endif %}
+          </div>
+        </div>
+
+        <div class="card-footer bg-transparent border-top p-3 d-flex justify-content-between align-items-center">
+          <a href="{{ url_for('listings.list_listings') }}" class="btn btn-outline-secondary rounded-pill">
+            &larr; Back to Listings
+          </a>
+          <div class="d-flex gap-2 align-items-center">
+            {% if user_can_edit %}
+              {% if listing.allocated_quantity > 0 and listing.status != 'fully_allocated' %}
+                <form method="POST" action="{{ url_for('listings.confirm_handover', listing_id=listing.listing_id) }}" data-confirm="Confirm food handover to volunteer driver for '{{ listing.food_name }}'?">
+                  <button type="submit" class="btn btn-success rounded-pill">
+                    <i data-lucide="check-circle" class="me-1"></i> Confirm Handover
+                  </button>
+                </form>
+              {% endif %}
+              <a href="{{ url_for('listings.edit_listing', listing_id=listing.listing_id) }}" class="btn btn-outline-forest rounded-pill">
+                <i data-lucide="pencil" class="me-1"></i> Edit Listing
+              </a>
+              <form method="POST" action="{{ url_for('listings.delete_listing_route', listing_id=listing.listing_id) }}" data-confirm="Are you sure you want to delete listing '{{ listing.listing_id }}'?">
+                <button type="submit" class="btn btn-outline-danger rounded-pill">
+                  <i data-lucide="trash-2" class="me-1"></i> Delete
+                </button>
+              </form>
+            {% endif %}
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Right Side: Expiry Clock & Logistics Card -->
+    <div class="col-lg-4">
+      <div class="card rounded-3 shadow-sm border-0 bg-surface mb-4">
+        <div class="card-header bg-forest text-white py-3">
+          <h6 class="mb-0 fw-bold d-flex align-items-center">
+            <i data-lucide="clock" class="me-2"></i> Expiry Monitoring
+          </h6>
+        </div>
+        <div class="card-body p-4 text-center">
+          <div class="mb-3">
+            <span class="text-muted small d-block">Shelf Life Status</span>
+            <span data-expiry-timestamp="{{ listing.expiry_at }}" class="badge badge-{{ listing.expiry_at|expiry_status }} fs-6 px-3 py-2 mt-2">
+              {{ listing.expiry_at|time_ago }}
+            </span>
+          </div>
+          <p class="text-muted small mb-3">
+            Deadline: <br>
+            <strong>{{ listing.expiry_at|format_datetime }}</strong>
+          </p>
+
+          {% if current_user.role == 'admin' %}
+            <a href="{{ url_for('matching.matching_page') }}" class="btn btn-leaf w-100 rounded-pill mb-2">
+              <i data-lucide="shuffle" class="me-1"></i> Match with Recipients
+            </a>
+          {% endif %}
+        </div>
+      </div>
+
+      <!-- Quick Tips Card -->
+      <div class="card rounded-3 shadow-sm border-0 bg-cream p-3">
+        <div class="d-flex align-items-center mb-2">
+          <i data-lucide="info" class="text-forest me-2"></i>
+          <strong class="text-forest">Academic Note</strong>
+        </div>
+        <p class="small text-muted mb-0">
+          SurplusShare uses <strong>Merge Sort</strong> to rank listings by <code>expiry_at</code> ascending. Listings approaching their deadline are prioritized automatically to minimize food waste.
+        </p>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}

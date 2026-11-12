@@ -1,0 +1,51 @@
+{% extends "base.html" %}
+
+{% block title %}403 Forbidden — Access Denied — SurplusShare{% endblock %}
+{% block page_title %}Access Denied{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center py-5">
+  <div class="col-md-8 col-lg-6 text-center">
+    <div class="card rounded-4 shadow-sm border-0 bg-surface p-4 p-md-5">
+      <div class="d-inline-flex align-items-center justify-content-center p-3 rounded-circle bg-terracotta text-white mb-3 mx-auto shadow-sm" style="width: 72px; height: 72px;">
+        <i data-lucide="shield-alert" style="width: 36px; height: 36px;"></i>
+      </div>
+      
+      <h2 class="h3 font-heading fw-bold text-forest mb-2">403 — Forbidden</h2>
+      <p class="text-charcoal mb-3">
+        You do not have the required permissions to access this administrative resource.
+      </p>
+
+      {% if user_role %}
+        <div class="p-3 bg-cream rounded-3 border mb-4 text-start small">
+          <div class="d-flex justify-content-between mb-1">
+            <span class="text-muted">Your Current Role:</span>
+            <span class="badge bg-forest text-white text-capitalize">{{ user_role }}</span>
+          </div>
+          {% if required_roles %}
+            <div class="d-flex justify-content-between">
+              <span class="text-muted">Required Role(s):</span>
+              <span class="badge bg-terracotta text-white">
+                {% for r in required_roles %}{{ r|capitalize }}{% if not loop.last %}, {% endif %}{% endfor %}
+              </span>
+            </div>
+          {% endif %}
+        </div>
+      {% endif %}
+
+      <p class="text-muted small mb-4">
+        If you believe this is an error or require administrative clearance, please contact the system administrator or switch to an authorized profile.
+      </p>
+
+      <div class="d-flex justify-content-center gap-2">
+        <a href="{{ url_for('public.home') }}" class="btn btn-outline-forest rounded-pill px-4">
+          <i data-lucide="home" class="me-1"></i> Return Home
+        </a>
+        <a href="{{ url_for('auth.login') }}" class="btn btn-leaf rounded-pill px-4">
+          <i data-lucide="log-in" class="me-1"></i> Switch Account
+        </a>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}

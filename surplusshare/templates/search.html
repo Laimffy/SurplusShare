@@ -1,0 +1,349 @@
+{% extends "base.html" %}
+
+{% block title %}Search &amp; Sort — Linear vs Binary Search — SurplusShare{% endblock %}
+{% block page_title %}Algorithm Search &amp; Expiry Prioritization{% endblock %}
+
+{% block content %}
+<div class="search-sort-container">
+  <!-- Educational Banner -->
+  <div class="card rounded-3 shadow-sm border-0 mb-4 bg-forest text-white p-3 p-md-4">
+    <div class="row align-items-center">
+      <div class="col-lg-8">
+        <span class="badge bg-leaf text-white mb-2 rounded-pill font-monospace text-uppercase" style="font-size: 0.75rem;">
+          DSA: Merge Sort &bull; Linear Search &bull; Binary Search Range Query
+        </span>
+        <h3 class="fw-bold font-heading mb-1">Comparative Algorithm Evaluation</h3>
+        <p class="small text-cream-muted mb-0">
+          Observe how <strong>Merge Sort (O(n log n))</strong> establishes an ordered search space by expiry timestamp, enabling <strong>Binary Search (O(log n + k))</strong> with lower and upper boundary lookups to dramatically outperform <strong>Linear Search (O(n))</strong> across window queries.
+        </p>
+      </div>
+      <div class="col-lg-4 text-lg-end mt-3 mt-lg-0">
+        <a href="{{ url_for('benchmark.benchmark_page') }}" class="btn btn-outline-light rounded-pill px-4 text-nowrap">
+          <i data-lucide="timer" class="me-1"></i> Multi-Query Benchmark &rarr;
+        </a>
+      </div>
+    </div>
+  </div>
+
+  <!-- Section 1: Merge Sort Before / After Demonstration -->
+  <div class="card rounded-3 shadow-sm border-0 mb-4 bg-surface">
+    <div class="card-header bg-transparent border-bottom py-3 d-flex justify-content-between align-items-center">
+      <div class="d-flex align-items-center">
+        <i data-lucide="arrow-up-down" class="text-forest me-2"></i>
+        <h5 class="mb-0 fw-bold font-heading text-forest">1. Merge Sort Prioritization (Before vs After)</h5>
+      </div>
+      <div class="d-flex gap-2">
+        <span class="badge bg-sage text-forest font-monospace">O(n log n)</span>
+        <span class="badge bg-leaf text-white font-monospace">{{ sort_stats.comparisons }} comparisons in {{ sort_stats.time_ms }} ms</span>
+      </div>
+    </div>
+    <div class="card-body p-3">
+      <div class="row g-3">
+        <!-- Unsorted Sample -->
+        <div class="col-md-6">
+          <div class="p-3 bg-cream rounded-3 border h-100">
+            <h6 class="fw-bold text-muted mb-2 d-flex align-items-center">
+              <i data-lucide="shuffle" class="me-1" style="width: 16px; height: 16px;"></i>
+              Unsorted Listings (Database Insertion Order)
+            </h6>
+            <div class="table-responsive" style="max-height: 240px;">
+              <table class="table table-sm table-borderless small mb-0">
+                <thead class="text-muted border-bottom">
+                  <tr>
+                    <th>ID</th>
+                    <th>Food Item</th>
+                    <th>Expiry Timestamp</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {% for u in unsorted_sample %}
+                    <tr>
+                      <td class="font-monospace text-muted">{{ u.listing_id }}</td>
+                      <td class="fw-semibold text-truncate" style="max-width: 140px;">{{ u.food_name }}</td>
+                      <td class="small">{{ u.expiry_at|format_datetime }}</td>
+                    </tr>
+                  {% endfor %}
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+
+        <!-- Merge Sorted Sample -->
+        <div class="col-md-6">
+          <div class="p-3 bg-sage-light rounded-3 border border-forest h-100">
+            <h6 class="fw-bold text-forest mb-2 d-flex align-items-center">
+              <i data-lucide="check-circle-2" class="me-1" style="width: 16px; height: 16px;"></i>
+              Merge Sorted by Expiry (Earliest First)
+            </h6>
+            <div class="table-responsive" style="max-height: 240px;">
+              <table class="table table-sm table-borderless small mb-0">
+                <thead class="text-forest border-bottom">
+                  <tr>
+                    <th>ID</th>
+                    <th>Food Item</th>
+                    <th>Expiry Timestamp</th>
+                    <th>Status</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {% for s in sorted_listings %}
+                    <tr>
+                      <td class="font-monospace text-forest fw-semibold">{{ s.listing_id }}</td>
+                      <td class="fw-bold text-truncate" style="max-width: 140px;">{{ s.food_name }}</td>
+                      <td class="small fw-semibold">{{ s.expiry_at|format_datetime }}</td>
+                      <td>
+                        <span class="badge badge-{{ s.expiry_at|expiry_status }}">{{ s.expiry_at|time_ago }}</span>
+                      </td>
+                    </tr>
+                  {% endfor %}
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Section 2: Expiry Window Search Query Form -->
+  <div class="card rounded-3 shadow-sm border-0 mb-4 bg-surface">
+    <div class="card-header bg-transparent border-bottom py-3">
+      <div class="d-flex align-items-center">
+        <i data-lucide="search" class="text-forest me-2"></i>
+        <h5 class="mb-0 fw-bold font-heading text-forest">2. Expiry Window Range Search Query</h5>
+      </div>
+    </div>
+    <div class="card-body p-4">
+      <form method="POST" action="{{ url_for('search.search_page') }}">
+        <input type="hidden" name="search_mode" value="window">
+
+        <div class="row g-3 mb-3">
+          <div class="col-md-4">
+            <label for="expiry_start" class="form-label fw-semibold text-charcoal">Window Start Time <span class="text-danger">*</span></label>
+            <input type="datetime-local" class="form-control" id="expiry_start" name="expiry_start" value="{{ search_params.start }}" required>
+          </div>
+          <div class="col-md-4">
+            <label for="expiry_end" class="form-label fw-semibold text-charcoal">Window End Time <span class="text-danger">*</span></label>
+            <input type="datetime-local" class="form-control" id="expiry_end" name="expiry_end" value="{{ search_params.end }}" required>
+          </div>
+          <div class="col-md-4">
+            <label for="category" class="form-label fw-semibold text-charcoal">Category Filter (Optional)</label>
+            <select class="form-select" id="category" name="category">
+              <option value="">All Categories</option>
+              {% for cat in ['Bakery', 'Vegetables', 'Fruits', 'Prepared Meals', 'Dairy', 'Dry Goods', 'Other'] %}
+                <option value="{{ cat }}" {% if search_params.category == cat %}selected{% endif %}>{{ cat }}</option>
+              {% endfor %}
+            </select>
+          </div>
+        </div>
+
+        <div class="row g-3 align-items-center">
+          <div class="col-md-4">
+            <label for="min_quantity" class="form-label fw-semibold text-charcoal">Min Quantity (Optional)</label>
+            <input type="number" step="0.1" min="0" class="form-control" id="min_quantity" name="min_quantity" value="{{ search_params.min_quantity }}" placeholder="e.g. 10">
+          </div>
+          <div class="col-md-5">
+            <label class="form-label fw-semibold text-charcoal d-block">Search Algorithm Mode</label>
+            <div class="d-flex gap-3 pt-1">
+              <div class="form-check">
+                <input class="form-check-input" type="radio" name="method" id="methodBoth" value="both" {% if search_params.method == 'both' or not search_params.method %}checked{% endif %}>
+                <label class="form-check-label" for="methodBoth">Compare Both</label>
+              </div>
+              <div class="form-check">
+                <input class="form-check-input" type="radio" name="method" id="methodLinear" value="linear" {% if search_params.method == 'linear' %}checked{% endif %}>
+                <label class="form-check-label" for="methodLinear">Linear Search</label>
+              </div>
+              <div class="form-check">
+                <input class="form-check-input" type="radio" name="method" id="methodBinary" value="binary" {% if search_params.method == 'binary' %}checked{% endif %}>
+                <label class="form-check-label" for="methodBinary">Binary Search</label>
+              </div>
+            </div>
+          </div>
+          <div class="col-md-3 text-md-end pt-3 pt-md-0">
+            <button type="submit" class="btn btn-leaf rounded-pill px-4 shadow-sm w-100">
+              <i data-lucide="play" class="me-1"></i> Execute Search
+            </button>
+          </div>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- Section 3: Search Results & Algorithm Comparison Cards -->
+  {% if results %}
+    <div class="results-comparison-area mb-4">
+      <div class="d-flex justify-content-between align-items-center mb-3">
+        <h4 class="fw-bold font-heading text-forest mb-0">Search Execution Analysis</h4>
+        {% if results.results_equivalent %}
+          <span class="badge bg-success px-3 py-2 rounded-pill font-monospace">
+            <i data-lucide="check" class="me-1" style="width: 14px; height: 14px;"></i> 100% Algorithmic Equivalence Verified
+          </span>
+        {% else %}
+          <span class="badge bg-danger px-3 py-2 rounded-pill">Discrepancy</span>
+        {% endif %}
+      </div>
+
+      <div class="row g-3 mb-4">
+        <!-- Linear Search Metric Card -->
+        <div class="col-md-6">
+          <div class="card rounded-3 shadow-sm border-start border-4 border-terracotta bg-surface h-100">
+            <div class="card-body p-4">
+              <div class="d-flex justify-content-between align-items-start mb-2">
+                <div>
+                  <span class="badge bg-terracotta text-white mb-1">Linear Search</span>
+                  <h5 class="fw-bold text-forest mb-0">Sequential Scan</h5>
+                </div>
+                <span class="font-monospace text-muted small fw-bold">O(n)</span>
+              </div>
+              <p class="small text-muted mb-3">Scans every single listing in the database sequentially without pre-sorting.</p>
+              <div class="row g-2 text-center">
+                <div class="col-4 p-2 bg-cream rounded">
+                  <small class="text-muted d-block" style="font-size: 0.7rem;">Time</small>
+                  <strong class="text-charcoal">{{ results.linear.time_ms }} ms</strong>
+                </div>
+                <div class="col-4 p-2 bg-cream rounded">
+                  <small class="text-muted d-block" style="font-size: 0.7rem;">Comparisons</small>
+                  <strong class="text-charcoal">{{ results.linear.comparisons }}</strong>
+                </div>
+                <div class="col-4 p-2 bg-cream rounded">
+                  <small class="text-muted d-block" style="font-size: 0.7rem;">Matches</small>
+                  <strong class="text-charcoal">{{ results.linear.results|length }}</strong>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Binary Search Metric Card -->
+        <div class="col-md-6">
+          <div class="card rounded-3 shadow-sm border-start border-4 border-leaf bg-surface h-100">
+            <div class="card-body p-4">
+              <div class="d-flex justify-content-between align-items-start mb-2">
+                <div>
+                  <span class="badge bg-leaf text-white mb-1">Binary Search Range</span>
+                  <h5 class="fw-bold text-forest mb-0">Logarithmic Boundary Scan</h5>
+                </div>
+                <span class="font-monospace text-muted small fw-bold">O(log n + k)</span>
+              </div>
+              <p class="small text-muted mb-3">Finds lower and upper bounds using binary search on expiry timestamps, then retrieves interval.</p>
+              <div class="row g-2 text-center">
+                <div class="col-4 p-2 bg-cream rounded">
+                  <small class="text-muted d-block" style="font-size: 0.7rem;">Time</small>
+                  <strong class="text-leaf">{{ results.binary.time_ms }} ms</strong>
+                </div>
+                <div class="col-4 p-2 bg-cream rounded">
+                  <small class="text-muted d-block" style="font-size: 0.7rem;">Bound Lookups</small>
+                  <strong class="text-leaf">{{ results.binary.comparisons }}</strong>
+                </div>
+                <div class="col-4 p-2 bg-cream rounded">
+                  <small class="text-muted d-block" style="font-size: 0.7rem;">Matches</small>
+                  <strong class="text-leaf">{{ results.binary.results|length }}</strong>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Matched Results Table -->
+      <div class="card rounded-3 shadow-sm border-0 bg-surface">
+        <div class="card-header bg-transparent border-bottom py-3 d-flex justify-content-between align-items-center">
+          <h5 class="mb-0 fw-bold font-heading text-forest">
+            Matched Listings in Expiry Window ({{ results.linear.results|length }} items)
+          </h5>
+        </div>
+        <div class="card-body p-0">
+          <div class="table-responsive">
+            <table class="table table-hover align-middle mb-0 custom-table">
+              <thead class="table-light small text-muted text-uppercase">
+                <tr>
+                  <th>Listing ID</th>
+                  <th>Food Item</th>
+                  <th>Category</th>
+                  <th>Quantity</th>
+                  <th>Donor</th>
+                  <th>Expiry Timestamp</th>
+                  <th>Status</th>
+                </tr>
+              </thead>
+              <tbody>
+                {% for item in results.linear.results %}
+                  <tr>
+                    <td class="font-monospace fw-semibold">{{ item.listing_id }}</td>
+                    <td><strong>{{ item.food_name }}</strong></td>
+                    <td><span class="badge bg-sage-light text-forest">{{ item.category }}</span></td>
+                    <td><span class="fw-bold">{{ item.quantity }}</span> <small class="text-muted">{{ item.unit }}</small></td>
+                    <td class="small text-muted">{{ item.donor_name }}</td>
+                    <td class="small">
+                      <span class="d-block">{{ item.expiry_at|format_datetime }}</span>
+                      <span class="badge badge-{{ item.expiry_at|expiry_status }}">{{ item.expiry_at|time_ago }}</span>
+                    </td>
+                    <td>
+                      <span class="badge bg-leaf text-white text-capitalize">{{ item.status }}</span>
+                    </td>
+                  </tr>
+                {% else %}
+                  <tr>
+                    <td colspan="7" class="text-center py-4 text-muted small">No food listings fall within the specified expiry window.</td>
+                  </tr>
+                {% endfor %}
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+    </div>
+  {% endif %}
+
+  <!-- Text Search Results (if text query was submitted) -->
+  {% if text_results %}
+    <div class="card rounded-3 shadow-sm border-0 bg-surface mb-4">
+      <div class="card-header bg-transparent border-bottom py-3 d-flex justify-content-between align-items-center">
+        <h5 class="mb-0 fw-bold font-heading text-forest">
+          Text Search Matches for "{{ text_query }}" ({{ text_results.results|length }} found)
+        </h5>
+        <span class="badge bg-sage text-forest font-monospace">Linear Search: {{ text_results.time_ms }} ms</span>
+      </div>
+      <div class="card-body p-0">
+        <div class="table-responsive">
+          <table class="table table-hover align-middle mb-0 custom-table">
+            <thead class="table-light small text-muted text-uppercase">
+              <tr>
+                <th>Listing ID</th>
+                <th>Food Item</th>
+                <th>Category</th>
+                <th>Quantity</th>
+                <th>Donor</th>
+                <th>Expiry</th>
+                <th>Action</th>
+              </tr>
+            </thead>
+            <tbody>
+              {% for item in text_results.results %}
+                <tr>
+                  <td class="font-monospace fw-semibold">{{ item.listing_id }}</td>
+                  <td><strong>{{ item.food_name }}</strong></td>
+                  <td><span class="badge bg-sage-light text-forest">{{ item.category }}</span></td>
+                  <td>{{ item.quantity }} {{ item.unit }}</td>
+                  <td class="small text-muted">{{ item.donor_name }}</td>
+                  <td class="small">{{ item.expiry_at|time_ago }}</td>
+                  <td>
+                    <a href="{{ url_for('listings.listing_detail', listing_id=item.listing_id) }}" class="btn btn-sm btn-outline-forest rounded-pill px-2">
+                      View
+                    </a>
+                  </td>
+                </tr>
+              {% else %}
+                <tr>
+                  <td colspan="7" class="text-center py-4 text-muted small">No listings matched your search query.</td>
+                </tr>
+              {% endfor %}
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  {% endif %}
+</div>
+{% endblock %}

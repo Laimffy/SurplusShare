@@ -1,0 +1,122 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 560" width="100%" height="100%">
+  <defs>
+    <linearGradient id="skyGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#FAF7EF"/>
+      <stop offset="100%" stop-color="#EBE3CF"/>
+    </linearGradient>
+    <linearGradient id="forestGrad" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" stop-color="#285943"/>
+      <stop offset="100%" stop-color="#1B3D2E"/>
+    </linearGradient>
+    <linearGradient id="crateWood" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%" stop-color="#8D6E63"/>
+      <stop offset="50%" stop-color="#A1887F"/>
+      <stop offset="100%" stop-color="#795548"/>
+    </linearGradient>
+    <linearGradient id="warmSun" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#FFF8E1" stop-opacity="0.8"/>
+      <stop offset="100%" stop-color="#FFE082" stop-opacity="0.2"/>
+    </linearGradient>
+    <filter id="softShadow" x="-10%" y="-10%" width="120%" height="120%">
+      <feDropShadow dx="0" dy="8" stdDeviation="12" flood-color="#29352C" flood-opacity="0.12"/>
+    </filter>
+  </defs>
+
+  <!-- Background Warm Canvas -->
+  <rect width="800" height="560" rx="20" fill="url(#skyGrad)"/>
+  <circle cx="680" cy="120" r="160" fill="url(#warmSun)"/>
+
+  <!-- Subtle Botanical Leaves Background Pattern -->
+  <g opacity="0.08" fill="#285943">
+    <path d="M720,280 C780,240 760,160 700,200 C640,240 660,320 720,280 Z"/>
+    <path d="M120,80 C180,40 160,-40 100,0 C40,40 60,120 120,80 Z"/>
+    <path d="M60,400 C120,360 100,280 40,320 C-20,360 0,440 60,400 Z"/>
+  </g>
+
+  <!-- Wooden Community Pantry Table / Surface -->
+  <path d="M40,380 L760,380 L740,520 L60,520 Z" fill="#6D4C41" opacity="0.95" filter="url(#softShadow)"/>
+  <rect x="40" y="380" width="720" height="24" rx="4" fill="#8D6E63"/>
+  <rect x="50" y="390" width="700" height="4" fill="#A1887F" opacity="0.4"/>
+
+  <!-- Left Reusable Crate: Fresh Organic Produce (Greens, Carrots, Tomatoes) -->
+  <g transform="translate(100, 240)">
+    <!-- Back of crate -->
+    <rect x="0" y="40" width="260" height="120" rx="8" fill="#5D4037"/>
+
+    <!-- Fresh Harvest Veggies peeking out -->
+    <!-- Leafy Greens -->
+    <path d="M30,50 C10,20 40,-20 70,10 C100,-15 130,20 110,60 Z" fill="#6B8E4E"/>
+    <path d="M45,45 C25,25 50,-5 75,20 C105,0 125,30 110,55 Z" fill="#A8BFA0" opacity="0.9"/>
+    <path d="M80,50 C110,-10 160,0 150,50 Z" fill="#4E7037"/>
+    <path d="M140,55 C160,15 210,10 200,60 Z" fill="#6B8E4E"/>
+
+    <!-- Fresh Red Tomatoes & Apples -->
+    <circle cx="60" cy="65" r="22" fill="#C77850"/>
+    <circle cx="56" cy="60" r="6" fill="#FFF" opacity="0.3"/>
+    <circle cx="100" cy="70" r="20" fill="#D75A38"/>
+    <circle cx="96" cy="66" r="5" fill="#FFF" opacity="0.3"/>
+
+    <!-- Carrots with Green Tops -->
+    <path d="M180,30 L165,100 L185,100 Z" fill="#E67E22" transform="rotate(-15 175 65)"/>
+    <path d="M210,35 L195,105 L215,105 Z" fill="#D35400" transform="rotate(10 205 70)"/>
+    <path d="M175,25 C170,5 180,-5 185,25 Z" fill="#6B8E4E"/>
+    <path d="M212,30 C215,10 225,5 220,30 Z" fill="#6B8E4E"/>
+
+    <!-- Front Wooden Slats of Crate -->
+    <rect x="-6" y="60" width="272" height="24" rx="4" fill="url(#crateWood)" filter="url(#softShadow)"/>
+    <rect x="-6" y="94" width="272" height="24" rx="4" fill="url(#crateWood)" filter="url(#softShadow)"/>
+    <rect x="-6" y="128" width="272" height="26" rx="4" fill="url(#crateWood)" filter="url(#softShadow)"/>
+
+    <!-- Corner brackets -->
+    <rect x="0" y="55" width="16" height="102" rx="3" fill="#3E2723"/>
+    <rect x="244" y="55" width="16" height="102" rx="3" fill="#3E2723"/>
+
+    <!-- Label Stamp: "RESCUED ORGANIC" -->
+    <rect x="70" y="100" width="120" height="20" rx="3" fill="#FAF7EF" opacity="0.9"/>
+    <text x="130" y="114" font-family="'DM Sans', sans-serif" font-size="10" font-weight="700" fill="#285943" text-anchor="middle" letter-spacing="1">LOCAL PRODUCE</text>
+  </g>
+
+  <!-- Right Reusable Crate: Artisanal Bakery Surplus (Baguettes, Loaves, Pastries) -->
+  <g transform="translate(420, 220)">
+    <!-- Back of crate -->
+    <rect x="0" y="60" width="270" height="120" rx="8" fill="#5D4037"/>
+
+    <!-- Crusty Baguettes & Bread Rolls -->
+    <!-- French Baguettes leaning -->
+    <rect x="40" y="-30" width="34" height="130" rx="17" fill="#D7A64B" transform="rotate(-25 57 35)"/>
+    <path d="M46,0 L62,-6 M44,20 L60,14 M42,40 L58,34" stroke="#8D6E63" stroke-width="3" stroke-linecap="round" transform="rotate(-25 57 35)"/>
+
+    <rect x="80" y="-45" width="36" height="145" rx="18" fill="#C8963E" transform="rotate(-15 98 27)"/>
+    <path d="M88,-15 L106,-22 M86,5 L104,-2 M84,25 L102,18" stroke="#795548" stroke-width="3" stroke-linecap="round" transform="rotate(-15 98 27)"/>
+
+    <!-- Sourdough Boules / Artisan Loaves -->
+    <ellipse cx="180" cy="65" rx="48" ry="36" fill="#D7A64B"/>
+    <path d="M150,55 Q180,45 210,55 M155,70 Q180,60 205,70" stroke="#795548" stroke-width="3" fill="none"/>
+    <ellipse cx="230" cy="80" rx="36" ry="28" fill="#B8860B"/>
+
+    <!-- Front Wooden Slats -->
+    <rect x="-6" y="80" width="282" height="24" rx="4" fill="url(#crateWood)" filter="url(#softShadow)"/>
+    <rect x="-6" y="114" width="282" height="24" rx="4" fill="url(#crateWood)" filter="url(#softShadow)"/>
+    <rect x="-6" y="148" width="282" height="26" rx="4" fill="url(#crateWood)" filter="url(#softShadow)"/>
+
+    <!-- Corner Brackets -->
+    <rect x="0" y="75" width="16" height="102" rx="3" fill="#3E2723"/>
+    <rect x="254" y="75" width="16" height="102" rx="3" fill="#3E2723"/>
+
+    <!-- Label Stamp: "BAKERY SURPLUS" -->
+    <rect x="80" y="120" width="115" height="20" rx="3" fill="#FAF7EF" opacity="0.9"/>
+    <text x="137" y="134" font-family="'DM Sans', sans-serif" font-size="10" font-weight="700" fill="#795548" text-anchor="middle" letter-spacing="1">BAKERY SURPLUS</text>
+  </g>
+
+  <!-- Floating Badge: "100% RESCUED & NOURISHED" -->
+  <g transform="translate(320, 100)" filter="url(#softShadow)">
+    <rect x="0" y="0" width="170" height="52" rx="26" fill="#285943"/>
+    <circle cx="26" cy="26" r="16" fill="#6B8E4E"/>
+    <path d="M21,26 L25,30 L32,22" stroke="#FFF" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" fill="none"/>
+    <text x="52" y="24" font-family="'DM Sans', sans-serif" font-size="11" font-weight="700" fill="#FAF7EF">COMMUNITY FIRST</text>
+    <text x="52" y="38" font-family="'DM Sans', sans-serif" font-size="10" font-weight="400" fill="#A8BFA0">Zero Food Waste</text>
+  </g>
+
+  <!-- Warm Sunbeams / Atmosphere Overlay -->
+  <polygon points="0,0 800,0 800,320 0,160" fill="url(#warmSun)" opacity="0.3"/>
+</svg>

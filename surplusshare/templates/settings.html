@@ -1,0 +1,95 @@
+{% extends "base.html" %}
+
+{% block title %}Settings &amp; Configuration — SurplusShare{% endblock %}
+{% block page_title %}System Settings &amp; Academic Info{% endblock %}
+
+{% block content %}
+<div class="settings-container" style="max-width: 850px; margin: 0 auto;">
+  <!-- Settings Form Card -->
+  <div class="card rounded-3 shadow-sm border-0 mb-4 bg-surface">
+    <div class="card-header bg-forest text-white p-3 p-md-4 rounded-top-3">
+      <div class="d-flex align-items-center">
+        <i data-lucide="settings" class="me-2" style="width: 24px; height: 24px;"></i>
+        <h4 class="mb-0 fw-bold font-heading">System Preferences</h4>
+      </div>
+      <p class="mb-0 small text-sage-light mt-1">
+        Configure application thresholds and algorithm behavior.
+      </p>
+    </div>
+
+    <div class="card-body p-4">
+      <form method="POST" action="{{ url_for('settings.update_settings') }}">
+        <h5 class="text-forest fw-bold font-heading mb-3">Expiry Monitoring Thresholds</h5>
+        <div class="row g-3 mb-4">
+          <div class="col-md-6">
+            <label for="warning_hours" class="form-label fw-semibold text-charcoal">Warning Threshold (Hours)</label>
+            <input type="number" class="form-control" id="warning_hours" name="warning_hours" value="24" min="1" max="168">
+            <small class="form-text text-muted">Listings expiring within this duration trigger yellow warning badges.</small>
+          </div>
+          <div class="col-md-6">
+            <label for="urgent_hours" class="form-label fw-semibold text-charcoal">Urgent Threshold (Hours)</label>
+            <input type="number" class="form-control" id="urgent_hours" name="urgent_hours" value="6" min="1" max="48">
+            <small class="form-text text-muted">Listings expiring within this duration trigger critical terracotta alerts.</small>
+          </div>
+        </div>
+
+        <h5 class="text-forest fw-bold font-heading mb-3 border-top pt-3">UI Display Settings</h5>
+        <div class="mb-4">
+          <div class="form-check form-switch mb-2">
+            <input class="form-check-input" type="checkbox" id="realtimeCountdown" checked disabled>
+            <label class="form-check-label fw-medium text-charcoal" for="realtimeCountdown">Enable Dynamic Real-Time Expiry Countdowns</label>
+          </div>
+          <div class="form-check form-switch">
+            <input class="form-check-input" type="checkbox" id="strictFifo" checked disabled>
+            <label class="form-check-label fw-medium text-charcoal" for="strictFifo">Enforce Strict Category FIFO Queue Matching</label>
+          </div>
+        </div>
+
+        <div class="d-flex justify-content-end pt-3 border-top">
+          <button type="submit" class="btn btn-leaf rounded-pill px-4 shadow-sm">
+            <i data-lucide="check" class="me-1"></i> Save Configuration
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- Academic Project Credits Card -->
+  <div class="card rounded-3 shadow-sm border-0 bg-surface p-4">
+    <div class="d-flex align-items-center mb-3">
+      <i data-lucide="graduation-cap" class="text-forest me-2" style="width: 28px; height: 28px;"></i>
+      <h4 class="mb-0 fw-bold font-heading text-forest">Academic DSA Final Project Credits</h4>
+    </div>
+
+    <dl class="row small mb-0">
+      <dt class="col-sm-4 text-muted">System Title</dt>
+      <dd class="col-sm-8 fw-bold text-forest">SurplusShare &mdash; Food Waste Reallocation System</dd>
+
+      <dt class="col-sm-4 text-muted">Official Tagline</dt>
+      <dd class="col-sm-8 text-charcoal">"Share More. Waste Less. Nourish Communities."</dd>
+
+      <dt class="col-sm-4 text-muted">Academic Focus</dt>
+      <dd class="col-sm-8">Data Structures and Algorithms (DSA) Practical Real-World Integration</dd>
+
+      <dt class="col-sm-4 text-muted">Global Impact</dt>
+      <dd class="col-sm-8">
+        <span class="badge bg-forest text-white me-1">UN SDG 2: Zero Hunger</span>
+        <span class="badge bg-leaf text-white">UN SDG 12: Responsible Consumption</span>
+      </dd>
+
+      <dt class="col-sm-4 text-muted">Core DSA Components</dt>
+      <dd class="col-sm-8">
+        <ul class="list-unstyled mb-0">
+          <li>&bull; <strong>FIFO Queue:</strong> Recipient request arrival fairness with partial fulfillment</li>
+          <li>&bull; <strong>Merge Sort:</strong> Divide-and-conquer stable $O(n \log n)$ expiry prioritization</li>
+          <li>&bull; <strong>Doubly Linked List:</strong> Bidirectional volunteer pickup sequence management</li>
+          <li>&bull; <strong>Linear vs Binary Search:</strong> Empirical window query runtime analysis</li>
+        </ul>
+      </dd>
+
+      <dt class="col-sm-4 text-muted">Technology Architecture</dt>
+      <dd class="col-sm-8 text-charcoal">Python 3 &bull; Flask &bull; SQLite &bull; Bootstrap 5 &bull; Chart.js &bull; Lucide Icons</dd>
+    </dl>
+  </div>
+</div>
+{% endblock %}

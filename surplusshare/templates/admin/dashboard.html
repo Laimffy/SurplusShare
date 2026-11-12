@@ -1,0 +1,261 @@
+{% extends "base.html" %}
+
+{% block title %}Administrator Operations Hub — SurplusShare{% endblock %}
+{% block page_title %}Administrator Operations Hub{% endblock %}
+
+{% block content %}
+<div class="admin-dashboard-container">
+  <!-- Top Admin Alert / Welcome Banner -->
+  <div class="card rounded-3 shadow-sm border-0 mb-4 bg-forest text-white p-3 p-md-4">
+    <div class="row align-items-center">
+      <div class="col-lg-8">
+        <span class="badge bg-leaf text-white mb-2 rounded-pill font-monospace text-uppercase" style="font-size: 0.75rem;">
+          <i data-lucide="shield" style="width: 13px; height: 13px;" class="me-1"></i> Role-Based Access Control: Active Administrator
+        </span>
+        <h3 class="fw-bold font-heading mb-1">Administrative Overview &amp; Control</h3>
+        <p class="small text-cream-muted mb-0">
+          Manage system users, partner organizations, donation listings, automated matching runs, news publications, and inspect real-time security audit trails.
+        </p>
+      </div>
+      <div class="col-lg-4 text-lg-end mt-3 mt-lg-0">
+        <a href="{{ url_for('admin.audit_logs') }}" class="btn btn-outline-light rounded-pill px-3 text-nowrap">
+          <i data-lucide="shield-check" class="me-1"></i> Security Audit Logs
+        </a>
+      </div>
+    </div>
+  </div>
+
+  <!-- Key Admin Metric Cards -->
+  <div class="row g-3 mb-4">
+    <div class="col-6 col-md-4 col-xl-2">
+      <div class="p-3 bg-surface rounded-3 border-start border-4 border-forest shadow-sm h-100">
+        <span class="text-muted small text-uppercase">System Users</span>
+        <h3 class="fw-bold text-forest mb-0 mt-1">{{ total_users }}</h3>
+        <small class="text-muted"><a href="{{ url_for('admin.users') }}" class="text-forest">Manage &rarr;</a></small>
+      </div>
+    </div>
+
+    <div class="col-6 col-md-4 col-xl-2">
+      <div class="p-3 bg-surface rounded-3 border-start border-4 border-leaf shadow-sm h-100">
+        <span class="text-muted small text-uppercase">Food Listings</span>
+        <h3 class="fw-bold text-leaf mb-0 mt-1">{{ total_listings }}</h3>
+        <small class="text-muted"><a href="{{ url_for('listings.list_listings') }}" class="text-leaf">Inspect &rarr;</a></small>
+      </div>
+    </div>
+
+    <div class="col-6 col-md-4 col-xl-2">
+      <div class="p-3 bg-surface rounded-3 border-start border-4 border-sage shadow-sm h-100">
+        <span class="text-muted small text-uppercase">Requests</span>
+        <h3 class="fw-bold text-charcoal mb-0 mt-1">{{ total_requests }}</h3>
+        <small class="text-muted"><a href="{{ url_for('requests_bp.list_requests') }}" class="text-charcoal">Queue &rarr;</a></small>
+      </div>
+    </div>
+
+    <div class="col-6 col-md-4 col-xl-2">
+      <div class="p-3 bg-surface rounded-3 border-start border-4 border-gold shadow-sm h-100">
+        <span class="text-muted small text-uppercase">Rescued kg</span>
+        <h3 class="fw-bold text-gold mb-0 mt-1">{{ total_rescued_kg }}</h3>
+        <small class="text-muted">Allocated</small>
+      </div>
+    </div>
+
+    <div class="col-6 col-md-4 col-xl-2">
+      <div class="p-3 bg-surface rounded-3 border-start border-4 border-terracotta shadow-sm h-100">
+        <span class="text-muted small text-uppercase">Partners</span>
+        <h3 class="fw-bold text-terracotta mb-0 mt-1">{{ total_partners }}</h3>
+        <small class="text-muted"><a href="{{ url_for('admin.partners') }}" class="text-terracotta">Review &rarr;</a></small>
+      </div>
+    </div>
+
+    <div class="col-6 col-md-4 col-xl-2">
+      <div class="p-3 bg-surface rounded-3 border-start border-4 border-forest shadow-sm h-100">
+        <span class="text-muted small text-uppercase">Inquiries</span>
+        <h3 class="fw-bold text-forest mb-0 mt-1">{{ new_inquiries }}</h3>
+        <small class="text-muted"><a href="{{ url_for('admin.inquiries') }}" class="text-forest">Inbox &rarr;</a></small>
+      </div>
+    </div>
+  </div>
+
+  <!-- Two Column Admin Tools Grid -->
+  <div class="row g-4 mb-4">
+    <!-- Left: Urgent Expiries Attention Watch -->
+    <div class="col-lg-6">
+      <div class="card rounded-3 shadow-sm border-0 bg-surface h-100">
+        <div class="card-header bg-transparent border-bottom py-3 d-flex justify-content-between align-items-center">
+          <div class="d-flex align-items-center gap-2">
+            <i data-lucide="clock" class="text-terracotta"></i>
+            <h5 class="mb-0 fw-bold font-heading text-forest">Priority Expiry Alerts</h5>
+          </div>
+          <a href="{{ url_for('matching.matching_page') }}" class="btn btn-sm btn-leaf rounded-pill px-3">
+            Run Matching &rarr;
+          </a>
+        </div>
+        <div class="card-body p-0">
+          {% if expiring_soon %}
+            <div class="table-responsive">
+              <table class="table table-hover align-middle mb-0 custom-table">
+                <thead class="table-light small text-muted text-uppercase">
+                  <tr>
+                    <th>Food Item</th>
+                    <th>Donor</th>
+                    <th>Available Qty</th>
+                    <th>Time Remaining</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {% for item in expiring_soon %}
+                    <tr>
+                      <td>
+                        <strong>{{ item.food_name }}</strong>
+                        <small class="text-muted font-monospace d-block">{{ item.listing_id }}</small>
+                      </td>
+                      <td class="small text-muted">{{ item.donor_name }}</td>
+                      <td><span class="badge bg-cream text-charcoal border">{{ item.quantity }} {{ item.unit }}</span></td>
+                      <td>
+                        <span data-expiry-timestamp="{{ item.expiry_at }}" class="badge badge-{{ item.expiry_at|expiry_status }}">
+                          {{ item.expiry_at|time_ago }}
+                        </span>
+                      </td>
+                    </tr>
+                  {% endfor %}
+                </tbody>
+              </table>
+            </div>
+          {% else %}
+            <div class="p-4 text-center text-muted small">No listings currently in urgent status.</div>
+          {% endif %}
+        </div>
+      </div>
+    </div>
+
+    <!-- Right: Recent Security Audit Trail -->
+    <div class="col-lg-6">
+      <div class="card rounded-3 shadow-sm border-0 bg-surface h-100">
+        <div class="card-header bg-transparent border-bottom py-3 d-flex justify-content-between align-items-center">
+          <div class="d-flex align-items-center gap-2">
+            <i data-lucide="shield-check" class="text-forest"></i>
+            <h5 class="mb-0 fw-bold font-heading text-forest">Recent Security Audit Events</h5>
+          </div>
+          <a href="{{ url_for('admin.audit_logs') }}" class="btn btn-sm btn-outline-forest rounded-pill px-3">
+            Full Log &rarr;
+          </a>
+        </div>
+        <div class="card-body p-0">
+          {% if recent_audits %}
+            <div class="table-responsive">
+              <table class="table table-sm table-hover align-middle mb-0 custom-table">
+                <thead class="table-light small text-muted text-uppercase">
+                  <tr>
+                    <th>Action</th>
+                    <th>User</th>
+                    <th>Resource</th>
+                    <th>Time</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {% for aud in recent_audits %}
+                    <tr>
+                      <td><span class="badge bg-sage text-forest font-monospace" style="font-size: 0.72rem;">{{ aud.action }}</span></td>
+                      <td><span class="fw-semibold text-charcoal small">{{ aud.username }}</span></td>
+                      <td class="small text-muted text-truncate" style="max-width: 140px;">{{ aud.resource_type }}</td>
+                      <td class="small text-muted">{{ aud.timestamp|time_ago }}</td>
+                    </tr>
+                  {% endfor %}
+                </tbody>
+              </table>
+            </div>
+          {% else %}
+            <div class="p-4 text-center text-muted small">No audit events logged yet.</div>
+          {% endif %}
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Quick Admin Module Links Grid -->
+  <div class="card rounded-3 shadow-sm border-0 bg-surface p-4">
+    <h5 class="fw-bold font-heading text-forest mb-3">Administrative Management Modules</h5>
+    <div class="row g-3">
+      <div class="col-md-3">
+        <a href="{{ url_for('admin.users') }}" class="p-3 bg-cream rounded-3 border d-flex align-items-center gap-3 text-decoration-none">
+          <div class="p-2 rounded-circle bg-forest text-white"><i data-lucide="users" style="width: 20px; height: 20px;"></i></div>
+          <div>
+            <strong class="text-forest d-block small">User Management</strong>
+            <small class="text-muted">Roles &amp; Access Control</small>
+          </div>
+        </a>
+      </div>
+
+      <div class="col-md-3">
+        <a href="{{ url_for('admin.partners') }}" class="p-3 bg-cream rounded-3 border d-flex align-items-center gap-3 text-decoration-none">
+          <div class="p-2 rounded-circle bg-leaf text-white"><i data-lucide="store" style="width: 20px; height: 20px;"></i></div>
+          <div>
+            <strong class="text-forest d-block small">Partner Profiles</strong>
+            <small class="text-muted">Confirmed &amp; Prospective</small>
+          </div>
+        </a>
+      </div>
+
+      <div class="col-md-3">
+        <a href="{{ url_for('admin.news') }}" class="p-3 bg-cream rounded-3 border d-flex align-items-center gap-3 text-decoration-none">
+          <div class="p-2 rounded-circle bg-gold text-dark"><i data-lucide="newspaper" style="width: 20px; height: 20px;"></i></div>
+          <div>
+            <strong class="text-forest d-block small">News &amp; Content</strong>
+            <small class="text-muted">Articles &amp; Announcements</small>
+          </div>
+        </a>
+      </div>
+
+      <div class="col-md-3">
+        <a href="{{ url_for('admin.faqs') }}" class="p-3 bg-cream rounded-3 border d-flex align-items-center gap-3 text-decoration-none">
+          <div class="p-2 rounded-circle bg-terracotta text-white"><i data-lucide="help-circle" style="width: 20px; height: 20px;"></i></div>
+          <div>
+            <strong class="text-forest d-block small">FAQ Manager</strong>
+            <small class="text-muted">Help &amp; Guidelines</small>
+          </div>
+        </a>
+      </div>
+
+      <div class="col-md-3">
+        <a href="{{ url_for('admin.inquiries') }}" class="p-3 bg-cream rounded-3 border d-flex align-items-center gap-3 text-decoration-none">
+          <div class="p-2 rounded-circle bg-forest text-white"><i data-lucide="mail" style="width: 20px; height: 20px;"></i></div>
+          <div>
+            <strong class="text-forest d-block small">Contact Inquiries</strong>
+            <small class="text-muted">Public Messages ({{ new_inquiries }} new)</small>
+          </div>
+        </a>
+      </div>
+
+      <div class="col-md-3">
+        <a href="{{ url_for('matching.matching_page') }}" class="p-3 bg-cream rounded-3 border d-flex align-items-center gap-3 text-decoration-none">
+          <div class="p-2 rounded-circle bg-leaf text-white"><i data-lucide="shuffle" style="width: 20px; height: 20px;"></i></div>
+          <div>
+            <strong class="text-forest d-block small">Matching Engine</strong>
+            <small class="text-muted">Merge Sort + FIFO</small>
+          </div>
+        </a>
+      </div>
+
+      <div class="col-md-3">
+        <a href="{{ url_for('schedule.list_schedules') }}" class="p-3 bg-cream rounded-3 border d-flex align-items-center gap-3 text-decoration-none">
+          <div class="p-2 rounded-circle bg-forest text-white"><i data-lucide="truck" style="width: 20px; height: 20px;"></i></div>
+          <div>
+            <strong class="text-forest d-block small">Pickup Routes</strong>
+            <small class="text-muted">Doubly Linked List</small>
+          </div>
+        </a>
+      </div>
+
+      <div class="col-md-3">
+        <a href="{{ url_for('admin.audit_logs') }}" class="p-3 bg-cream rounded-3 border d-flex align-items-center gap-3 text-decoration-none">
+          <div class="p-2 rounded-circle bg-dark text-white"><i data-lucide="shield-check" style="width: 20px; height: 20px;"></i></div>
+          <div>
+            <strong class="text-forest d-block small">Audit Trail</strong>
+            <small class="text-muted">Security &amp; Operation Logs</small>
+          </div>
+        </a>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}

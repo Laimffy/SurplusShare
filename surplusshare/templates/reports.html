@@ -1,0 +1,183 @@
+{% extends "base.html" %}
+
+{% block title %}Reports &amp; Analytics — SurplusShare{% endblock %}
+{% block page_title %}Sustainability Reports &amp; Analytics{% endblock %}
+
+{% block content %}
+<div class="reports-container">
+  <!-- Export & Action Bar -->
+  <div class="card rounded-3 shadow-sm border-0 mb-4 bg-forest text-white p-3 p-md-4">
+    <div class="d-flex flex-column flex-md-row justify-content-between align-items-md-center gap-3">
+      <div>
+        <span class="badge bg-leaf text-white mb-2 rounded-pill font-monospace text-uppercase" style="font-size: 0.75rem;">
+          Impact Reporting
+        </span>
+        <h3 class="fw-bold font-heading mb-1">Community Food Redistribution Impact</h3>
+        <p class="small text-cream-muted mb-0">
+          Tracking surplus rescue efficiency, allocation fairness, and waste minimization metrics.
+        </p>
+      </div>
+      <div>
+        <a href="{{ url_for('reports.export_csv') }}" class="btn btn-leaf rounded-pill px-4 shadow-sm text-nowrap">
+          <i data-lucide="download" class="me-1"></i> Export Data to CSV
+        </a>
+      </div>
+    </div>
+  </div>
+
+  <!-- Summary Metric Cards -->
+  <div class="row g-3 mb-4">
+    <div class="col-6 col-md-3">
+      <div class="p-3 bg-surface rounded-3 border-start border-4 border-forest shadow-sm">
+        <span class="text-muted small text-uppercase">Total Food Posted</span>
+        <h3 class="fw-bold text-forest mb-0 mt-1">{{ stats.total_listings }}</h3>
+        <small class="text-muted">Registered entries</small>
+      </div>
+    </div>
+    <div class="col-6 col-md-3">
+      <div class="p-3 bg-surface rounded-3 border-start border-4 border-gold shadow-sm">
+        <span class="text-muted small text-uppercase">Rescued Surplus</span>
+        <h3 class="fw-bold text-gold mb-0 mt-1">{{ stats.total_quantity_allocated|round(1) }}</h3>
+        <small class="text-muted">Units redistributed</small>
+      </div>
+    </div>
+    <div class="col-6 col-md-3">
+      <div class="p-3 bg-surface rounded-3 border-start border-4 border-leaf shadow-sm">
+        <span class="text-muted small text-uppercase">Allocations Completed</span>
+        <h3 class="fw-bold text-leaf mb-0 mt-1">{{ stats.total_allocations }}</h3>
+        <small class="text-muted">Fulfilled matches</small>
+      </div>
+    </div>
+    <div class="col-6 col-md-3">
+      <div class="p-3 bg-surface rounded-3 border-start border-4 border-sage shadow-sm">
+        <span class="text-muted small text-uppercase">Active Demand</span>
+        <h3 class="fw-bold text-charcoal mb-0 mt-1">{{ stats.pending_requests }}</h3>
+        <small class="text-muted">Requests in queue</small>
+      </div>
+    </div>
+  </div>
+
+  <!-- Analytical Charts -->
+  <div class="row g-4 mb-4">
+    <div class="col-md-6">
+      <div class="card rounded-3 shadow-sm border-0 bg-surface h-100">
+        <div class="card-header bg-transparent border-bottom py-3">
+          <h5 class="mb-0 fw-bold font-heading text-forest">Food Distribution by Category</h5>
+        </div>
+        <div class="card-body">
+          <div style="height: 280px; position: relative;">
+            <canvas id="reportsCategoryChart"></canvas>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="col-md-6">
+      <div class="card rounded-3 shadow-sm border-0 bg-surface h-100">
+        <div class="card-header bg-transparent border-bottom py-3">
+          <h5 class="mb-0 fw-bold font-heading text-forest">Listing Status Breakdown</h5>
+        </div>
+        <div class="card-body">
+          <div style="height: 280px; position: relative;">
+            <canvas id="reportsStatusBarChart"></canvas>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Detailed Allocations Table -->
+  <div class="card rounded-3 shadow-sm border-0 bg-surface mb-4">
+    <div class="card-header bg-transparent border-bottom py-3 d-flex justify-content-between align-items-center">
+      <h5 class="mb-0 fw-bold font-heading text-forest">Recent Reallocation Records</h5>
+      <span class="badge bg-leaf text-white">{{ allocations|length }} records</span>
+    </div>
+    <div class="card-body p-0">
+      <div class="table-responsive">
+        <table class="table table-hover align-middle mb-0 custom-table">
+          <thead class="table-light small text-muted text-uppercase">
+            <tr>
+              <th>Allocation ID</th>
+              <th>Food Item</th>
+              <th>Category</th>
+              <th>Donor</th>
+              <th>Recipient</th>
+              <th>Allocated Units</th>
+              <th>Date</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for a in allocations[:15] %}
+              <tr>
+                <td class="font-monospace fw-semibold">{{ a.allocation_id }}</td>
+                <td><strong>{{ a.food_name }}</strong></td>
+                <td><span class="badge bg-sage-light text-forest">{{ a.category }}</span></td>
+                <td class="small">{{ a.donor_name }}</td>
+                <td class="text-forest fw-semibold">{{ a.organization_name }}</td>
+                <td><span class="badge bg-leaf text-white">{{ a.allocated_quantity }}</span></td>
+                <td class="small text-muted">{{ a.allocated_at|format_datetime }}</td>
+              </tr>
+            {% else %}
+              <tr>
+                <td colspan="7" class="text-center py-4 text-muted small">No allocations recorded yet.</td>
+              </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+  document.addEventListener('DOMContentLoaded', () => {
+    // 1. Category Chart
+    const catCtx = document.getElementById('reportsCategoryChart');
+    if (catCtx) {
+      const rawCategories = {{ stats.categories|tojson }};
+      new Chart(catCtx, {
+        type: 'doughnut',
+        data: {
+          labels: Object.keys(rawCategories),
+          datasets: [{
+            data: Object.values(rawCategories),
+            backgroundColor: ['#285943', '#6B8E4E', '#A8BFA0', '#D7A64B', '#C77850', '#795548', '#8d6e63']
+          }]
+        },
+        options: {
+          responsive: true,
+          maintainAspectRatio: false
+        }
+      });
+    }
+
+    // 2. Status Bar Chart
+    const statusCtx = document.getElementById('reportsStatusBarChart');
+    if (statusCtx) {
+      new Chart(statusCtx, {
+        type: 'bar',
+        data: {
+          labels: ['Available', 'Fully Rescued', 'Expired'],
+          datasets: [{
+            label: 'Listings Count',
+            data: [{{ stats.available_listings }}, {{ stats.fully_allocated }}, {{ stats.expired_listings }}],
+            backgroundColor: ['#6B8E4E', '#285943', '#C77850'],
+            borderRadius: 6
+          }]
+        },
+        options: {
+          responsive: true,
+          maintainAspectRatio: false,
+          plugins: {
+            legend: { display: false }
+          },
+          scales: {
+            y: { beginAtZero: true }
+          }
+        }
+      });
+    }
+  });
+</script>
+{% endblock %}

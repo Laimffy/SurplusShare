@@ -1,0 +1,323 @@
+<aside id="sidebar" class="app-sidebar sidebar">
+  <!-- Brand Logo & Tagline -->
+  <div class="sidebar-brand">
+    <a href="{{ url_for('main.dashboard') }}" class="sidebar-brand-link">
+      <div class="sidebar-brand-icon">
+        <i data-lucide="sprout"></i>
+      </div>
+      <div class="sidebar-brand-info">
+        <span class="sidebar-brand-text">SurplusShare</span>
+        <span class="sidebar-brand-tagline">Share More. Waste Less.</span>
+      </div>
+    </a>
+    <button id="sidebarClose" class="sidebar-close-btn d-lg-none" type="button" aria-label="Close navigation">
+      <i data-lucide="x"></i>
+    </button>
+  </div>
+
+  <!-- Navigation Menu Sections (Strictly Role-Based) -->
+  <nav class="sidebar-nav">
+
+    {% if current_user.role == 'admin' %}
+      <!-- ================= ADMIN NAVIGATION ================= -->
+      <div class="sidebar-nav-label">Core Platform</div>
+      <ul class="sidebar-menu">
+        <li class="sidebar-item">
+          <a class="sidebar-link {% if request.path == '/admin' or request.path == '/admin/dashboard' or request.path == '/dashboard' %}active{% endif %}" href="{{ url_for('admin.dashboard') }}">
+            <i data-lucide="layout-dashboard" class="sidebar-icon"></i>
+            <span class="sidebar-link-text">Admin Dashboard</span>
+          </a>
+        </li>
+        <li class="sidebar-item">
+          <a class="sidebar-link {% if request.path.startswith('/listings') %}active{% endif %}" href="{{ url_for('listings.list_listings') }}">
+            <i data-lucide="package" class="sidebar-icon"></i>
+            <span class="sidebar-link-text">All Food Listings</span>
+          </a>
+        </li>
+        <li class="sidebar-item">
+          <a class="sidebar-link {% if request.path.startswith('/requests') %}active{% endif %}" href="{{ url_for('requests_bp.list_requests') }}">
+            <i data-lucide="heart-handshake" class="sidebar-icon"></i>
+            <span class="sidebar-link-text">Recipient Requests</span>
+          </a>
+        </li>
+      </ul>
+
+      <div class="sidebar-nav-label">Admin Management</div>
+      <ul class="sidebar-menu">
+        <li class="sidebar-item">
+          <a class="sidebar-link {% if request.path == '/admin' or request.path == '/admin/dashboard' %}active{% endif %}" href="{{ url_for('admin.dashboard') }}">
+            <i data-lucide="shield" class="sidebar-icon"></i>
+            <span class="sidebar-link-text">Admin Analytics</span>
+          </a>
+        </li>
+        <li class="sidebar-item">
+          <a class="sidebar-link {% if request.path.startswith('/admin/users') %}active{% endif %}" href="{{ url_for('admin.users') }}">
+            <i data-lucide="users" class="sidebar-icon"></i>
+            <span class="sidebar-link-text">User Management</span>
+          </a>
+        </li>
+        <li class="sidebar-item">
+          <a class="sidebar-link {% if request.path.startswith('/admin/partners') %}active{% endif %}" href="{{ url_for('admin.partners') }}">
+            <i data-lucide="store" class="sidebar-icon"></i>
+            <span class="sidebar-link-text">Partner Management</span>
+          </a>
+        </li>
+        <li class="sidebar-item">
+          <a class="sidebar-link {% if request.path.startswith('/admin/news') %}active{% endif %}" href="{{ url_for('admin.news') }}">
+            <i data-lucide="newspaper" class="sidebar-icon"></i>
+            <span class="sidebar-link-text">News &amp; Content</span>
+          </a>
+        </li>
+        <li class="sidebar-item">
+          <a class="sidebar-link {% if request.path.startswith('/admin/faqs') %}active{% endif %}" href="{{ url_for('admin.faqs') }}">
+            <i data-lucide="help-circle" class="sidebar-icon"></i>
+            <span class="sidebar-link-text">FAQ Management</span>
+          </a>
+        </li>
+        <li class="sidebar-item">
+          <a class="sidebar-link {% if request.path.startswith('/admin/inquiries') %}active{% endif %}" href="{{ url_for('admin.inquiries') }}">
+            <i data-lucide="mail" class="sidebar-icon"></i>
+            <span class="sidebar-link-text">Contact Inquiries</span>
+          </a>
+        </li>
+        <li class="sidebar-item">
+          <a class="sidebar-link {% if request.path.startswith('/admin/audit-logs') %}active{% endif %}" href="{{ url_for('admin.audit_logs') }}">
+            <i data-lucide="shield-check" class="sidebar-icon"></i>
+            <span class="sidebar-link-text">Security Audit Logs</span>
+          </a>
+        </li>
+      </ul>
+
+      <div class="sidebar-nav-label">DSA Implementations</div>
+      <ul class="sidebar-menu">
+        <li class="sidebar-item">
+          <a class="sidebar-link {% if request.path.startswith('/matching') %}active{% endif %}" href="{{ url_for('matching.matching_page') }}">
+            <i data-lucide="shuffle" class="sidebar-icon"></i>
+            <span class="sidebar-link-text">Automatic Matching</span>
+            <span class="badge-algo">FIFO+Merge</span>
+          </a>
+        </li>
+        <li class="sidebar-item">
+          <a class="sidebar-link {% if request.path.startswith('/schedule') %}active{% endif %}" href="{{ url_for('schedule.list_schedules') }}">
+            <i data-lucide="truck" class="sidebar-icon"></i>
+            <span class="sidebar-link-text">Pickup Schedules</span>
+            <span class="badge-algo">Doubly Linked</span>
+          </a>
+        </li>
+        <li class="sidebar-item">
+          <a class="sidebar-link {% if request.path.startswith('/search') %}active{% endif %}" href="{{ url_for('search.search_page') }}">
+            <i data-lucide="search" class="sidebar-icon"></i>
+            <span class="sidebar-link-text">Search &amp; Sort</span>
+            <span class="badge-algo">Binary vs Linear</span>
+          </a>
+        </li>
+        <li class="sidebar-item">
+          <a class="sidebar-link {% if request.path.startswith('/benchmark') %}active{% endif %}" href="{{ url_for('benchmark.benchmark_page') }}">
+            <i data-lucide="timer" class="sidebar-icon"></i>
+            <span class="sidebar-link-text">Algorithm Benchmark</span>
+            <span class="badge-algo">O(n log n)</span>
+          </a>
+        </li>
+      </ul>
+
+      <div class="sidebar-nav-label">Monitoring &amp; Insights</div>
+      <ul class="sidebar-menu">
+        <li class="sidebar-item">
+          <a class="sidebar-link {% if request.path.startswith('/monitoring') %}active{% endif %}" href="{{ url_for('monitoring.monitoring_page') }}">
+            <i data-lucide="alert-triangle" class="sidebar-icon"></i>
+            <span class="sidebar-link-text">Expiry Monitoring</span>
+          </a>
+        </li>
+        <li class="sidebar-item">
+          <a class="sidebar-link {% if request.path.startswith('/reports') %}active{% endif %}" href="{{ url_for('reports.reports_page') }}">
+            <i data-lucide="bar-chart-3" class="sidebar-icon"></i>
+            <span class="sidebar-link-text">Reports &amp; Analytics</span>
+          </a>
+        </li>
+        <li class="sidebar-item">
+          <a class="sidebar-link {% if request.path.startswith('/settings') %}active{% endif %}" href="{{ url_for('settings.settings_page') }}">
+            <i data-lucide="settings" class="sidebar-icon"></i>
+            <span class="sidebar-link-text">System Settings</span>
+          </a>
+        </li>
+      </ul>
+
+    {% elif current_user.role == 'donor' %}
+      <!-- ================= DONOR NAVIGATION ================= -->
+      <div class="sidebar-nav-label">Donor Portal</div>
+      <ul class="sidebar-menu">
+        <li class="sidebar-item">
+          <a class="sidebar-link {% if request.path == '/donor/dashboard' or request.path == '/dashboard' %}active{% endif %}" href="{{ url_for('main.donor_dashboard') }}">
+            <i data-lucide="layout-dashboard" class="sidebar-icon"></i>
+            <span class="sidebar-link-text">Donation Dashboard</span>
+          </a>
+        </li>
+        <li class="sidebar-item">
+          <a class="sidebar-link {% if request.path == '/listings' %}active{% endif %}" href="{{ url_for('listings.list_listings') }}">
+            <i data-lucide="package" class="sidebar-icon"></i>
+            <span class="sidebar-link-text">My Food Listings</span>
+          </a>
+        </li>
+        <li class="sidebar-item">
+          <a class="sidebar-link {% if request.path == '/listings/new' %}active{% endif %}" href="{{ url_for('listings.new_listing') }}">
+            <i data-lucide="plus-circle" class="sidebar-icon"></i>
+            <span class="sidebar-link-text">Post Food Donation</span>
+          </a>
+        </li>
+        <li class="sidebar-item">
+          <a class="sidebar-link {% if request.path.startswith('/schedule') %}active{% endif %}" href="{{ url_for('schedule.list_schedules') }}">
+            <i data-lucide="truck" class="sidebar-icon"></i>
+            <span class="sidebar-link-text">Pickups &amp; Handover</span>
+          </a>
+        </li>
+        <li class="sidebar-item">
+          <a class="sidebar-link {% if request.path.startswith('/monitoring') %}active{% endif %}" href="{{ url_for('monitoring.monitoring_page') }}">
+            <i data-lucide="alert-triangle" class="sidebar-icon"></i>
+            <span class="sidebar-link-text">Expiry Alerts</span>
+          </a>
+        </li>
+      </ul>
+
+    {% elif current_user.role == 'recipient' %}
+      <!-- ================= RECIPIENT NAVIGATION ================= -->
+      <div class="sidebar-nav-label">Recipient Portal</div>
+      <ul class="sidebar-menu">
+        <li class="sidebar-item">
+          <a class="sidebar-link {% if request.path == '/recipient/dashboard' or request.path == '/dashboard' %}active{% endif %}" href="{{ url_for('main.recipient_dashboard') }}">
+            <i data-lucide="layout-dashboard" class="sidebar-icon"></i>
+            <span class="sidebar-link-text">Recipient Dashboard</span>
+          </a>
+        </li>
+        <li class="sidebar-item">
+          <a class="sidebar-link {% if request.path.startswith('/available-food') %}active{% endif %}" href="{{ url_for('public.available_food') }}">
+            <i data-lucide="shopping-bag" class="sidebar-icon"></i>
+            <span class="sidebar-link-text">Available Food Catalog</span>
+          </a>
+        </li>
+        <li class="sidebar-item">
+          <a class="sidebar-link {% if request.path == '/requests' %}active{% endif %}" href="{{ url_for('requests_bp.list_requests') }}">
+            <i data-lucide="heart-handshake" class="sidebar-icon"></i>
+            <span class="sidebar-link-text">My Food Requests</span>
+          </a>
+        </li>
+        <li class="sidebar-item">
+          <a class="sidebar-link {% if request.path == '/requests/new' %}active{% endif %}" href="{{ url_for('requests_bp.new_request') }}">
+            <i data-lucide="plus-circle" class="sidebar-icon"></i>
+            <span class="sidebar-link-text">Request Food</span>
+          </a>
+        </li>
+      </ul>
+
+    {% elif current_user.role == 'volunteer' %}
+      <!-- ================= VOLUNTEER NAVIGATION ================= -->
+      <div class="sidebar-nav-label">Volunteer Portal</div>
+      <ul class="sidebar-menu">
+        <li class="sidebar-item">
+          <a class="sidebar-link {% if request.path == '/volunteer/dashboard' or request.path == '/pickup/dashboard' or request.path == '/dashboard' %}active{% endif %}" href="{{ url_for('main.volunteer_dashboard') }}">
+            <i data-lucide="layout-dashboard" class="sidebar-icon"></i>
+            <span class="sidebar-link-text">Pickup Dashboard</span>
+          </a>
+        </li>
+        <li class="sidebar-item">
+          <a class="sidebar-link {% if request.path.startswith('/schedule') %}active{% endif %}" href="{{ url_for('schedule.list_schedules') }}">
+            <i data-lucide="truck" class="sidebar-icon"></i>
+            <span class="sidebar-link-text">My Assigned Pickups</span>
+            <span class="badge-algo">Doubly Linked</span>
+          </a>
+        </li>
+      </ul>
+
+    {% endif %}
+
+    <!-- External / Public Portal Link (Available to All) -->
+    <div class="sidebar-nav-label">Public Website</div>
+    <ul class="sidebar-menu">
+      <li class="sidebar-item">
+        <a class="sidebar-link" href="{{ url_for('public.home') }}" target="_blank">
+          <i data-lucide="external-link" class="sidebar-icon"></i>
+          <span class="sidebar-link-text">SurplusShare Public</span>
+        </a>
+      </li>
+    </ul>
+
+  </nav>
+
+  <!-- Classroom Demo Role Switching (Disabled in production) -->
+  {% if demo_role_switching_enabled %}
+    <div class="p-2 mx-3 my-2 bg-cream rounded-3 border small" style="font-size: 0.72rem;">
+      <div class="d-flex align-items-center justify-content-between mb-1">
+        <span class="text-muted fw-bold text-uppercase" style="letter-spacing: 0.04em;">Demo Role:</span>
+        <span class="badge bg-forest text-white text-capitalize">{{ current_user.role }}</span>
+      </div>
+      <div class="dropdown">
+        <button class="btn btn-xs btn-outline-forest w-100 rounded-pill dropdown-toggle text-truncate" type="button" data-bs-toggle="dropdown" aria-expanded="false" style="font-size: 0.72rem;">
+          <i data-lucide="repeat" class="me-1" style="width: 12px; height: 12px;"></i> Switch Role
+        </button>
+        <ul class="dropdown-menu dropdown-menu-end shadow-sm border-0 rounded-3 p-1" style="font-size: 0.78rem;">
+          <li>
+            <form action="{{ url_for('auth.demo_switch') }}" method="POST">
+              <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+              <input type="hidden" name="target_user" value="admin_user">
+              <input type="hidden" name="next" value="{{ request.path }}">
+              <button type="submit" class="dropdown-item py-1 rounded-2 {% if current_user.username == 'admin_user' %}active{% endif %}">
+                <i data-lucide="shield" class="me-1 text-forest" style="width: 14px; height: 14px;"></i> Admin User
+              </button>
+            </form>
+          </li>
+          <li>
+            <form action="{{ url_for('auth.demo_switch') }}" method="POST">
+              <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+              <input type="hidden" name="target_user" value="sunrise_bakery">
+              <input type="hidden" name="next" value="{{ request.path }}">
+              <button type="submit" class="dropdown-item py-1 rounded-2 {% if current_user.username == 'sunrise_bakery' %}active{% endif %}">
+                <i data-lucide="package" class="me-1 text-leaf" style="width: 14px; height: 14px;"></i> Sunrise Bakery (Donor)
+              </button>
+            </form>
+          </li>
+          <li>
+            <form action="{{ url_for('auth.demo_switch') }}" method="POST">
+              <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+              <input type="hidden" name="target_user" value="community_pantry_a">
+              <input type="hidden" name="next" value="{{ request.path }}">
+              <button type="submit" class="dropdown-item py-1 rounded-2 {% if current_user.username == 'community_pantry_a' %}active{% endif %}">
+                <i data-lucide="heart-handshake" class="me-1 text-terracotta" style="width: 14px; height: 14px;"></i> Community Pantry A (Recipient)
+              </button>
+            </form>
+          </li>
+          <li>
+            <form action="{{ url_for('auth.demo_switch') }}" method="POST">
+              <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+              <input type="hidden" name="target_user" value="juan_volunteer">
+              <input type="hidden" name="next" value="{{ request.path }}">
+              <button type="submit" class="dropdown-item py-1 rounded-2 {% if current_user.username == 'juan_volunteer' %}active{% endif %}">
+                <i data-lucide="truck" class="me-1 text-gold" style="width: 14px; height: 14px;"></i> Juan Volunteer (Volunteer)
+              </button>
+            </form>
+          </li>
+        </ul>
+      </div>
+    </div>
+  {% endif %}
+
+  <!-- User Summary & Sign Out at Bottom -->
+  <div class="sidebar-footer">
+    <div class="sidebar-user-card">
+      <div class="sidebar-avatar">
+        <span>{{ current_user.display_name[:2].upper() if current_user.display_name else 'US' }}</span>
+      </div>
+      <div class="sidebar-user-details text-truncate">
+        <span class="sidebar-user-name text-truncate">{{ current_user.display_name }}</span>
+        <span class="sidebar-user-role text-capitalize">{{ current_user.role }}</span>
+      </div>
+      {% if current_user.is_authenticated %}
+        <a href="{{ url_for('auth.logout') }}" class="sidebar-auth-btn" title="Sign Out">
+          <i data-lucide="log-out"></i>
+        </a>
+      {% else %}
+        <a href="{{ url_for('auth.login') }}" class="sidebar-auth-btn" title="Sign In">
+          <i data-lucide="log-in"></i>
+        </a>
+      {% endif %}
+    </div>
+  </div>
+</aside>

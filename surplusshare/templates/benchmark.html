@@ -1,0 +1,230 @@
+{% extends "base.html" %}
+
+{% block title %}Algorithm Benchmark Dashboard — SurplusShare{% endblock %}
+{% block page_title %}Algorithm Performance Benchmark{% endblock %}
+
+{% block content %}
+<div class="benchmark-container">
+  <!-- Educational Banner -->
+  <div class="card rounded-3 shadow-sm border-0 mb-4 bg-forest text-white p-3 p-md-4">
+    <div class="row align-items-center">
+      <div class="col-lg-8">
+        <span class="badge bg-gold text-dark mb-2 rounded-pill font-monospace text-uppercase" style="font-size: 0.75rem;">
+          Academic DSA Laboratory
+        </span>
+        <h3 class="fw-bold font-heading mb-1">Empirical Runtime &amp; Complexity Benchmarking</h3>
+        <p class="small text-cream-muted mb-0">
+          Compare empirical wall-clock runtimes of <strong>Merge Sort</strong>, <strong>Linear Search</strong>, and <strong>Binary Search (Range Query)</strong> across synthetic datasets up to 50,000 food records and evaluate the amortized multi-query break-even threshold.
+        </p>
+      </div>
+      <div class="col-lg-4 text-lg-end mt-3 mt-lg-0">
+        <span class="badge bg-leaf text-white px-3 py-2 rounded-pill font-monospace">Python time.perf_counter()</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- Interactive Configuration Panel -->
+  <div class="card rounded-3 shadow-sm border-0 mb-4 bg-surface">
+    <div class="card-header bg-transparent border-bottom py-3">
+      <div class="d-flex align-items-center">
+        <i data-lucide="sliders" class="text-forest me-2"></i>
+        <h5 class="mb-0 fw-bold font-heading text-forest">Benchmark Parameters</h5>
+      </div>
+    </div>
+    <div class="card-body p-4">
+      <div class="row g-3 align-items-end">
+        <div class="col-md-3">
+          <label for="datasetSizeSelect" class="form-label fw-semibold text-charcoal">Dataset Size (N)</label>
+          <select id="datasetSizeSelect" class="form-select">
+            <option value="1000" selected>1,000 listings</option>
+            <option value="10000">10,000 listings</option>
+            <option value="50000">50,000 listings</option>
+          </select>
+        </div>
+
+        <div class="col-md-3">
+          <label for="queryCountSelect" class="form-label fw-semibold text-charcoal">Query Workload (Q)</label>
+          <select id="queryCountSelect" class="form-select">
+            <option value="1">1 single query</option>
+            <option value="100" selected>100 batch queries</option>
+            <option value="1000">1,000 batch queries</option>
+          </select>
+        </div>
+
+        <div class="col-md-3">
+          <label for="trialsSelect" class="form-label fw-semibold text-charcoal">Repeated Trials (Median)</label>
+          <select id="trialsSelect" class="form-select">
+            <option value="3" selected>3 trials (fast)</option>
+            <option value="5">5 trials (high precision)</option>
+          </select>
+        </div>
+
+        <div class="col-md-3">
+          <button id="runBenchmarkBtn" type="button" class="btn btn-leaf rounded-pill w-100 shadow-sm">
+            <i data-lucide="play" class="me-1"></i> Run Benchmark Trial
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Loading Indicator -->
+  <div id="benchmarkLoading" class="text-center py-5 d-none">
+    <div class="spinner-border text-forest mb-3" style="width: 3rem; height: 3rem;" role="status">
+      <span class="visually-hidden">Executing benchmarks...</span>
+    </div>
+    <h5 class="text-forest font-heading">Executing Sorting &amp; Searching Trials...</h5>
+    <p class="text-muted small">Generating synthetic dataset, timing Merge Sort, Linear Search, and Binary Range Bounds.</p>
+  </div>
+
+  <!-- Results Container -->
+  <div id="benchmarkResultsContainer" class="d-none">
+    <!-- Top Highlights / Equivalence Row -->
+    <div class="d-flex flex-wrap justify-content-between align-items-center mb-3 gap-2">
+      <h4 class="fw-bold font-heading text-forest mb-0">Benchmark Empirical Metrics</h4>
+      <div class="d-flex gap-2" id="benchEquivalence"></div>
+    </div>
+
+    <!-- Metrics Breakdown Cards -->
+    <div class="row g-3 mb-4">
+      <div class="col-md-4">
+        <div class="p-3 bg-surface rounded-3 border-start border-4 border-leaf shadow-sm">
+          <span class="text-muted small text-uppercase">Per-Query Speedup</span>
+          <h2 class="fw-bold text-leaf mb-0 mt-1" id="benchSpeedup">&mdash;</h2>
+          <small class="text-muted">Binary vs Linear Search per query</small>
+        </div>
+      </div>
+
+      <div class="col-md-4">
+        <div class="p-3 bg-surface rounded-3 border-start border-4 border-gold shadow-sm">
+          <span class="text-muted small text-uppercase">Break-Even Workload</span>
+          <h3 class="fw-bold text-gold mb-0 mt-1" id="benchBreakEven">&mdash;</h3>
+          <small class="text-muted">Queries where Pre-sort + Binary beats Linear</small>
+        </div>
+      </div>
+
+      <div class="col-md-4">
+        <div class="p-3 bg-surface rounded-3 border-start border-4 border-forest shadow-sm">
+          <span class="text-muted small text-uppercase">Dataset Evaluated</span>
+          <h3 class="fw-bold text-forest mb-0 mt-1">
+            <span id="benchDatasetSize">0</span> <small class="fs-6 text-muted">items</small>
+          </h3>
+          <small class="text-muted"><span id="benchQueryCount">0</span> queries over <span id="benchTrialsCount">3</span> trials</small>
+        </div>
+      </div>
+    </div>
+
+    <!-- Comparative Table -->
+    <div class="card rounded-3 shadow-sm border-0 bg-surface mb-4">
+      <div class="card-header bg-transparent border-bottom py-3">
+        <h5 class="mb-0 fw-bold font-heading text-forest">Algorithm Comparison Table</h5>
+      </div>
+      <div class="card-body p-0">
+        <div class="table-responsive">
+          <table class="table table-hover align-middle mb-0 custom-table">
+            <thead class="table-light small text-muted text-uppercase">
+              <tr>
+                <th>Algorithm / Pipeline</th>
+                <th>DSA Paradigm</th>
+                <th>Time Complexity</th>
+                <th>Median Runtime (Total)</th>
+                <th>Per-Query Average</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td><strong class="text-charcoal">Linear Search</strong></td>
+                <td><span class="badge bg-secondary text-white">Sequential Scan</span></td>
+                <td><span class="badge bg-terracotta text-white font-monospace">O(n) per query</span></td>
+                <td class="fw-bold text-terracotta" id="benchLinearTotalTime">&mdash;</td>
+                <td class="font-monospace" id="benchLinearPerQuery">&mdash;</td>
+              </tr>
+              <tr>
+                <td><strong class="text-leaf">Binary Search (Sorted Data)</strong></td>
+                <td><span class="badge bg-leaf text-white">Logarithmic Bounds + Scan</span></td>
+                <td><span class="badge bg-leaf text-white font-monospace">O(log n + k)</span></td>
+                <td class="fw-bold text-leaf" id="benchBinaryTotalTime">&mdash;</td>
+                <td class="font-monospace text-leaf fw-bold" id="benchBinaryPerQuery">&mdash;</td>
+              </tr>
+              <tr>
+                <td><strong class="text-gold">Merge Sort (One-Time Cost)</strong></td>
+                <td><span class="badge bg-gold text-dark">Divide &amp; Conquer</span></td>
+                <td><span class="badge bg-forest text-white font-monospace">O(n log n)</span></td>
+                <td class="fw-bold text-forest" id="benchMergeSortTime">&mdash;</td>
+                <td class="text-muted small">One-time indexing step</td>
+              </tr>
+              <tr class="table-light">
+                <td><strong class="text-forest">Combined Pipeline (Sort + Binary)</strong></td>
+                <td><span class="badge bg-forest text-white">Indexed Search</span></td>
+                <td><span class="font-monospace small">O(n log n + Q(log n + k))</span></td>
+                <td class="fw-bold text-forest" id="benchSortedPipelineTime">&mdash;</td>
+                <td class="text-muted small">Amortized over Q queries</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+    <!-- Chart Visualization -->
+    <div class="card rounded-3 shadow-sm border-0 bg-surface mb-4">
+      <div class="card-header bg-transparent border-bottom py-3">
+        <h5 class="mb-0 fw-bold font-heading text-forest">Performance Comparison Chart</h5>
+      </div>
+      <div class="card-body">
+        <div style="height: 320px; position: relative;">
+          <canvas id="benchmarkComparisonChart"></canvas>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Static Educational Theory Section -->
+  <div class="card rounded-3 shadow-sm border-0 bg-surface p-4">
+    <h4 class="fw-bold font-heading text-forest mb-3">Theoretical Complexity Analysis &amp; Academic Findings</h4>
+    
+    <div class="row g-4">
+      <div class="col-md-4">
+        <div class="p-3 bg-cream rounded-3 border h-100">
+          <h5 class="fw-bold text-forest font-heading">Merge Sort</h5>
+          <span class="badge bg-forest text-white font-monospace mb-2">O(n log n)</span>
+          <p class="small text-muted mb-0">
+            Merge Sort guarantees $O(n \log n)$ comparisons regardless of initial order. Auxiliary space is $O(n)$ due to merge buffer sublists. The stability of Merge Sort ensures that food listings posted earlier maintain precedence when expiry timestamps coincide.
+          </p>
+        </div>
+      </div>
+
+      <div class="col-md-4">
+        <div class="p-3 bg-cream rounded-3 border h-100">
+          <h5 class="fw-bold text-forest font-heading">Linear Search</h5>
+          <span class="badge bg-terracotta text-white font-monospace mb-2">O(n)</span>
+          <p class="small text-muted mb-0">
+            Linear Search checks every entry sequentially. For a single one-off query ($Q = 1$), it avoids the $O(n \log n)$ sorting overhead. However, when evaluating multiple queries, total work grows linearly as $O(Q \cdot n)$.
+          </p>
+        </div>
+      </div>
+
+      <div class="col-md-4">
+        <div class="p-3 bg-cream rounded-3 border h-100">
+          <h5 class="fw-bold text-forest font-heading">Binary Range Query</h5>
+          <span class="badge bg-leaf text-white font-monospace mb-2">O(log n + k)</span>
+          <p class="small text-muted mb-0">
+            Lower and upper bounds are found in $O(\log n)$ comparisons each. Once boundaries are established, the engine scans the $k$ matching records inside the window. For large workloads ($Q \gg 1$), Binary Search significantly outperforms Linear Search.
+          </p>
+        </div>
+      </div>
+    </div>
+
+    <div class="mt-4 p-3 bg-sage-light rounded-3 border border-forest">
+      <h6 class="fw-bold text-forest mb-1">Amortized Analysis &amp; Break-Even Equation</h6>
+      <p class="small text-charcoal mb-0">
+        Sorting has an initial cost $T_{sort}$. Each subsequent binary search query costs $T_{binary}$, whereas each linear query costs $T_{linear}$. The break-even query count $Q_{break-even}$ is given by:
+        <br>
+        <code>Q &ge; T_sort / (T_linear - T_binary)</code>.
+        <br>
+        Whenever the system expects to perform more than $Q_{break-even}$ queries during a donation cycle, pre-sorting listings with Merge Sort is strictly more efficient.
+      </p>
+    </div>
+  </div>
+</div>
+{% endblock %}

@@ -1,0 +1,160 @@
+{% extends "base.html" %}
+
+{% block title %}Sign In &amp; Registration — SurplusShare{% endblock %}
+{% block page_title %}Account Access{% endblock %}
+
+{% block content %}
+<div class="auth-page-wrapper py-3 py-md-5">
+  <div class="row justify-content-center">
+    <div class="col-md-9 col-lg-7 col-xl-6">
+      
+      <!-- Brand Header Card -->
+      <div class="text-center mb-4">
+        <div class="d-inline-flex align-items-center justify-content-center p-3 rounded-circle bg-forest text-white mb-3 shadow-sm">
+          <i data-lucide="sprout" style="width: 32px; height: 32px;"></i>
+        </div>
+        <h2 class="h3 font-heading fw-bold text-forest mb-1">SurplusShare</h2>
+        <p class="text-muted small">"Share More. Waste Less. Nourish Communities."</p>
+      </div>
+
+      <div class="card rounded-4 shadow-sm border-0 bg-surface overflow-hidden">
+        <!-- Auth Tabs Navigation -->
+        <div class="card-header bg-cream border-bottom p-0">
+          <ul class="nav nav-tabs nav-fill border-0 auth-nav-tabs" id="authTabs" role="tablist">
+            <li class="nav-item" role="presentation">
+              <button class="nav-link py-3 fw-bold {% if active_tab != 'register' %}active text-forest bg-surface border-bottom-0{% else %}text-muted{% endif %}" 
+                      id="signin-tab" data-bs-toggle="tab" data-bs-target="#signin-pane" type="button" role="tab">
+                <i data-lucide="log-in" class="me-1" style="width: 16px; height: 16px;"></i> Sign In
+              </button>
+            </li>
+            <li class="nav-item" role="presentation">
+              <button class="nav-link py-3 fw-bold {% if active_tab == 'register' %}active text-forest bg-surface border-bottom-0{% else %}text-muted{% endif %}" 
+                      id="register-tab" data-bs-toggle="tab" data-bs-target="#register-pane" type="button" role="tab">
+                <i data-lucide="user-plus" class="me-1" style="width: 16px; height: 16px;"></i> Register Organization
+              </button>
+            </li>
+          </ul>
+        </div>
+
+        <div class="card-body p-4 p-md-5">
+          <div class="tab-content" id="authTabsContent">
+            
+            <!-- Tab 1: Sign In Pane -->
+            <div class="tab-pane fade {% if active_tab != 'register' %}show active{% endif %}" id="signin-pane" role="tabpanel">
+              <form method="POST" action="{{ url_for('auth.login') }}">
+                <div class="mb-3">
+                  <label for="identifier" class="form-label fw-semibold text-charcoal">Username or Email Address</label>
+                  <div class="input-group">
+                    <span class="input-group-text bg-cream border-end-0">
+                      <i data-lucide="user" class="text-muted" style="width: 16px; height: 16px;"></i>
+                    </span>
+                    <input type="text" class="form-control border-start-0 ps-0" id="identifier" name="identifier" 
+                           value="{{ identifier or 'admin_user' }}" placeholder="Enter your username or email" required>
+                  </div>
+                </div>
+
+                <div class="mb-4">
+                  <label for="password" class="form-label fw-semibold text-charcoal">Password</label>
+                  <div class="input-group">
+                    <span class="input-group-text bg-cream border-end-0">
+                      <i data-lucide="lock" class="text-muted" style="width: 16px; height: 16px;"></i>
+                    </span>
+                    <input type="password" class="form-control border-start-0 ps-0" id="password" name="password" 
+                           value="password123" placeholder="Enter your password" required>
+                  </div>
+                </div>
+
+                <button type="submit" class="btn btn-leaf btn-lg w-100 rounded-pill shadow-sm mb-3">
+                  <i data-lucide="arrow-right" class="me-1"></i> Sign In to SurplusShare
+                </button>
+
+                <!-- Quick Demo Profiles Pills (Academic / Dev Demonstration Only) -->
+                {% if demo_role_switching_enabled %}
+                  <div class="p-3 bg-cream rounded-3 border border-light mt-3">
+                    <small class="text-muted fw-bold d-block mb-2 text-uppercase" style="font-size: 0.7rem; letter-spacing: 0.05em;">
+                      Academic Demo Accounts (Password: <code>password123</code>):
+                    </small>
+                    <div class="d-flex flex-wrap gap-1">
+                      <button type="button" class="btn btn-xs btn-outline-forest rounded-pill" onclick="fillLogin('admin_user')">
+                        Admin
+                      </button>
+                      <button type="button" class="btn btn-xs btn-outline-forest rounded-pill" onclick="fillLogin('sunrise_bakery')">
+                        Sunrise Bakery (Donor)
+                      </button>
+                      <button type="button" class="btn btn-xs btn-outline-forest rounded-pill" onclick="fillLogin('community_pantry_a')">
+                        Community Pantry A (Recipient)
+                      </button>
+                      <button type="button" class="btn btn-xs btn-outline-forest rounded-pill" onclick="fillLogin('juan_volunteer')">
+                        Juan (Volunteer)
+                      </button>
+                    </div>
+                  </div>
+                {% endif %}
+              </form>
+            </div>
+
+            <!-- Tab 2: Register Pane -->
+            <div class="tab-pane fade {% if active_tab == 'register' %}show active{% endif %}" id="register-pane" role="tabpanel">
+              <form method="POST" action="{{ url_for('auth.register') }}">
+                <div class="row g-3 mb-3">
+                  <div class="col-md-6">
+                    <label for="reg_username" class="form-label fw-semibold text-charcoal">Username <span class="text-danger">*</span></label>
+                    <input type="text" class="form-control" id="reg_username" name="username" placeholder="e.g. metro_pantry" required>
+                  </div>
+                  <div class="col-md-6">
+                    <label for="reg_display_name" class="form-label fw-semibold text-charcoal">Full Name / Contact <span class="text-danger">*</span></label>
+                    <input type="text" class="form-control" id="reg_display_name" name="display_name" placeholder="e.g. Maria Santos" required>
+                  </div>
+                </div>
+
+                <div class="row g-3 mb-3">
+                  <div class="col-md-6">
+                    <label for="reg_org" class="form-label fw-semibold text-charcoal">Organization Name</label>
+                    <input type="text" class="form-control" id="reg_org" name="organization" placeholder="e.g. Metro Community Pantry">
+                  </div>
+                  <div class="col-md-6">
+                    <label for="reg_role" class="form-label fw-semibold text-charcoal">Community Role <span class="text-danger">*</span></label>
+                    <select class="form-select" id="reg_role" name="role" required>
+                      <option value="recipient" selected>Recipient (Pantry, Shelter, Program)</option>
+                      <option value="donor">Donor (Restaurant, Bakery, Grocery)</option>
+                      <option value="volunteer">Volunteer (Pickup &amp; Delivery Driver)</option>
+                    </select>
+                  </div>
+                </div>
+
+                <div class="mb-3">
+                  <label for="reg_email" class="form-label fw-semibold text-charcoal">Email Address <span class="text-danger">*</span></label>
+                  <input type="email" class="form-control" id="reg_email" name="email" placeholder="e.g. contact@organization.ph" required>
+                </div>
+
+                <div class="row g-3 mb-4">
+                  <div class="col-md-6">
+                    <label for="reg_password" class="form-label fw-semibold text-charcoal">Password <span class="text-danger">*</span></label>
+                    <input type="password" class="form-control" id="reg_password" name="password" placeholder="At least 6 characters" required>
+                  </div>
+                  <div class="col-md-6">
+                    <label for="reg_confirm_password" class="form-label fw-semibold text-charcoal">Confirm Password <span class="text-danger">*</span></label>
+                    <input type="password" class="form-control" id="reg_confirm_password" name="confirm_password" placeholder="Re-enter password" required>
+                  </div>
+                </div>
+
+                <button type="submit" class="btn btn-leaf btn-lg w-100 rounded-pill shadow-sm">
+                  <i data-lucide="check" class="me-1"></i> Create SurplusShare Account
+                </button>
+              </form>
+            </div>
+
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+  function fillLogin(username) {
+    document.getElementById('identifier').value = username;
+    document.getElementById('password').value = 'password123';
+  }
+</script>
+{% endblock %}

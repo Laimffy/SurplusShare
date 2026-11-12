@@ -1,0 +1,341 @@
+{% extends "public/base.html" %}
+
+{% block title %}SurplusShare — Food Waste Reallocation System | Home{% endblock %}
+
+{% block content %}
+<!-- Hero Section -->
+<section class="public-hero">
+  <div class="container">
+    <div class="row align-items-center g-5">
+      <!-- Left Column: Headline & Action Buttons -->
+      <div class="col-lg-6">
+        <div class="d-inline-flex align-items-center gap-2 px-3 py-1 rounded-pill bg-sage-light text-forest small fw-semibold mb-3">
+          <i data-lucide="shield-check" style="width: 15px; height: 15px;"></i>
+          Philippine Community Food Rescue Platform
+        </div>
+        <h1 class="font-heading display-4 fw-bold text-forest mb-3 lh-sm">
+          Good Food Deserves a Second Chance.
+        </h1>
+        <p class="fs-5 text-charcoal mb-4" style="color: #4a5a4d;">
+          Connecting restaurants, bakeries, caterers, and supermarkets with local community pantries, feeding programs, and shelters before edible surplus goes to waste.
+        </p>
+
+        <div class="d-flex flex-wrap gap-3 mb-4">
+          <a href="{{ url_for('auth.login') }}" class="btn btn-leaf btn-lg rounded-pill px-4 shadow-sm text-nowrap">
+            <i data-lucide="package-plus" class="me-2"></i> Donate Surplus Food
+          </a>
+          <a href="{{ url_for('public.available_food') }}" class="btn btn-outline-forest btn-lg rounded-pill px-4 text-nowrap">
+            <i data-lucide="search" class="me-2"></i> Browse Available Food
+          </a>
+        </div>
+
+        <div class="d-flex align-items-center gap-3 pt-2 text-muted small">
+          <span class="d-flex align-items-center"><i data-lucide="check" class="text-leaf me-1" style="width: 16px; height: 16px;"></i> 100% Free for Charities</span>
+          <span class="d-flex align-items-center"><i data-lucide="check" class="text-leaf me-1" style="width: 16px; height: 16px;"></i> Food Safety Verified</span>
+          <span class="d-flex align-items-center"><i data-lucide="check" class="text-leaf me-1" style="width: 16px; height: 16px;"></i> Real-Time Matching</span>
+        </div>
+      </div>
+
+      <!-- Right Column: Hero Photograph with warm styling -->
+      <div class="col-lg-6">
+        <div class="position-relative">
+          <div class="rounded-4 overflow-hidden shadow-lg border border-3 border-white">
+            <img src="{{ url_for('static', filename='images/hero-food-rescue.jpg') }}" 
+                 alt="Volunteers and community members packaging fresh surplus food" 
+                 class="img-fluid w-100 object-fit-cover" 
+                 style="max-height: 440px;"
+                 onerror="this.src='{{ url_for('static', filename='images/hero-fallback.svg') }}'">
+          </div>
+          <!-- Floating Badge -->
+          <div class="position-absolute bottom-0 start-0 translate-middle-y ms-3 p-3 bg-white rounded-3 shadow-sm border border-light d-flex align-items-center gap-3">
+            <div class="p-2 rounded-circle bg-leaf text-white d-flex align-items-center justify-content-center" style="width: 44px; height: 44px;">
+              <i data-lucide="scale" style="width: 22px; height: 22px;"></i>
+            </div>
+            <div>
+              <div class="h5 fw-bold text-forest mb-0 font-heading">{{ metrics.total_rescued_kg }} kg</div>
+              <small class="text-muted">Wholesome Food Rescued</small>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- Verified Impact KPI Statistics Section -->
+<section class="py-5 bg-white border-bottom">
+  <div class="container">
+    <div class="row g-4 text-center">
+      <div class="col-6 col-md-3">
+        <div class="p-3">
+          <div class="d-inline-flex p-3 rounded-circle bg-forest-subtle text-forest mb-2">
+            <i data-lucide="package-check" style="width: 28px; height: 28px; color: var(--clr-forest);"></i>
+          </div>
+          <h2 class="font-heading fw-bold text-forest mb-1">{{ metrics.total_rescued_kg }} kg</h2>
+          <p class="text-muted small mb-0">Total Food Rescued &amp; Distributed</p>
+        </div>
+      </div>
+
+      <div class="col-6 col-md-3">
+        <div class="p-3">
+          <div class="d-inline-flex p-3 rounded-circle bg-success-subtle text-success mb-2">
+            <i data-lucide="heart" style="width: 28px; height: 28px; color: var(--clr-leaf);"></i>
+          </div>
+          <h2 class="font-heading fw-bold text-leaf mb-1">{{ metrics.recipients_served }}</h2>
+          <p class="text-muted small mb-0">Recipient Pantries &amp; Shelters</p>
+        </div>
+      </div>
+
+      <div class="col-6 col-md-3">
+        <div class="p-3">
+          <div class="d-inline-flex p-3 rounded-circle bg-warning-subtle text-warning mb-2">
+            <i data-lucide="store" style="width: 28px; height: 28px; color: var(--clr-gold);"></i>
+          </div>
+          <h2 class="font-heading fw-bold text-gold mb-1">{{ metrics.active_partners }}</h2>
+          <p class="text-muted small mb-0">Verified Philippine Food Donors</p>
+        </div>
+      </div>
+
+      <div class="col-6 col-md-3">
+        <div class="p-3">
+          <div class="d-inline-flex p-3 rounded-circle bg-primary-subtle text-primary mb-2">
+            <i data-lucide="truck" style="width: 28px; height: 28px; color: var(--clr-forest);"></i>
+          </div>
+          <h2 class="font-heading fw-bold text-charcoal mb-1">{{ metrics.completed_distributions }}</h2>
+          <p class="text-muted small mb-0">Completed Route Deliveries</p>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- How It Works Summary -->
+<section class="public-section bg-cream">
+  <div class="container">
+    <div class="text-center max-w-700 mx-auto mb-5" style="max-width: 680px;">
+      <span class="badge bg-leaf text-white rounded-pill px-3 py-1 mb-2 font-monospace text-uppercase" style="font-size: 0.75rem;">
+        Simple 5-Step Process
+      </span>
+      <h2 class="font-heading fw-bold text-forest mb-3">How SurplusShare Works</h2>
+      <p class="text-charcoal mb-0">
+        We bridge the gap between commercial surplus and local hunger through an algorithmic, fair redistribution system.
+      </p>
+    </div>
+
+    <div class="row g-4">
+      <div class="col-md-4">
+        <div class="card h-100 rounded-4 border-0 shadow-sm bg-surface p-4 text-center">
+          <div class="d-inline-flex align-items-center justify-content-center p-3 rounded-circle bg-sage-light text-forest mx-auto mb-3" style="width: 60px; height: 60px;">
+            <i data-lucide="store" style="width: 28px; height: 28px;"></i>
+          </div>
+          <span class="badge bg-forest text-white rounded-pill mx-auto mb-2" style="font-size: 0.7rem;">Step 1</span>
+          <h5 class="font-heading fw-bold text-forest mb-2">Food Businesses Post Surplus</h5>
+          <p class="text-muted small mb-0">
+            Restaurants, bakeries, and grocers list edible surplus food, complete with safe expiry deadlines, portion quantities, and handling instructions.
+          </p>
+        </div>
+      </div>
+
+      <div class="col-md-4">
+        <div class="card h-100 rounded-4 border-0 shadow-sm bg-surface p-4 text-center">
+          <div class="d-inline-flex align-items-center justify-content-center p-3 rounded-circle bg-sage-light text-forest mx-auto mb-3" style="width: 60px; height: 60px;">
+            <i data-lucide="heart-handshake" style="width: 28px; height: 28px;"></i>
+          </div>
+          <span class="badge bg-forest text-white rounded-pill mx-auto mb-2" style="font-size: 0.7rem;">Step 2</span>
+          <h5 class="font-heading fw-bold text-forest mb-2">Community Pantries Request</h5>
+          <p class="text-muted small mb-0">
+            Pantries and feeding programs submit food requests to category-based FIFO queues, guaranteeing fair, starvation-free access.
+          </p>
+        </div>
+      </div>
+
+      <div class="col-md-4">
+        <div class="card h-100 rounded-4 border-0 shadow-sm bg-surface p-4 text-center">
+          <div class="d-inline-flex align-items-center justify-content-center p-3 rounded-circle bg-sage-light text-forest mx-auto mb-3" style="width: 60px; height: 60px;">
+            <i data-lucide="cpu" style="width: 28px; height: 28px;"></i>
+          </div>
+          <span class="badge bg-forest text-white rounded-pill mx-auto mb-2" style="font-size: 0.7rem;">Step 3</span>
+          <h5 class="font-heading fw-bold text-forest mb-2">Deterministic Matching</h5>
+          <p class="text-muted small mb-0">
+            Merge Sort sorts items approaching expiry first, matching them with pending recipient queues. Volunteer routes are sequenced using Doubly Linked Lists.
+          </p>
+        </div>
+      </div>
+    </div>
+
+    <div class="text-center mt-5">
+      <a href="{{ url_for('public.how_it_works') }}" class="btn btn-outline-forest rounded-pill px-4">
+        Explore Technical Architecture &amp; Route Sequencing &rarr;
+      </a>
+    </div>
+  </div>
+</section>
+
+<!-- Available Food Public Preview -->
+<section class="public-section bg-white">
+  <div class="container">
+    <div class="d-flex flex-column flex-md-row justify-content-between align-items-md-end mb-4 gap-2">
+      <div>
+        <span class="badge bg-sage text-forest rounded-pill px-3 py-1 mb-2 font-monospace text-uppercase" style="font-size: 0.75rem;">
+          Public Donation Catalog
+        </span>
+        <h2 class="font-heading fw-bold text-forest mb-1">Available Food Donations</h2>
+        <p class="text-muted small mb-0">Real-time surplus food ready for immediate community rescue in Metro Manila.</p>
+      </div>
+      <div>
+        <a href="{{ url_for('public.available_food') }}" class="btn btn-leaf rounded-pill px-4 shadow-sm text-nowrap">
+          View Complete Catalog ({{ metrics.available_listings_count }} items) &rarr;
+        </a>
+      </div>
+    </div>
+
+    <div class="row g-4">
+      {% for item in recent_available %}
+        <div class="col-md-4">
+          <div class="card h-100 rounded-4 border-0 shadow-sm bg-surface position-relative overflow-hidden">
+            <div class="card-body p-4 d-flex flex-column">
+              <div class="d-flex justify-content-between align-items-start mb-2">
+                <span class="badge bg-sage-light text-forest">{{ item.category }}</span>
+                <span class="badge bg-leaf text-white">Available</span>
+              </div>
+
+              <h5 class="font-heading fw-bold text-forest mb-1">{{ item.food_name }}</h5>
+              <div class="text-muted small mb-3">
+                <i data-lucide="map-pin" class="me-1 text-terracotta" style="width: 14px; height: 14px;"></i>
+                {{ item.pickup_location }}
+              </div>
+
+              <div class="p-3 bg-cream rounded-3 border mb-3">
+                <div class="d-flex justify-content-between">
+                  <span class="small text-muted">Available Quantity:</span>
+                  <span class="fw-bold text-charcoal">{{ item.quantity }} {{ item.unit }}</span>
+                </div>
+                <div class="d-flex justify-content-between mt-1">
+                  <span class="small text-muted">Condition:</span>
+                  <span class="small text-forest fw-medium">{{ item.food_condition }}</span>
+                </div>
+              </div>
+
+              <div class="mt-auto d-flex justify-content-between align-items-center pt-2 border-top">
+                <small class="text-muted">
+                  <i data-lucide="clock" class="me-1" style="width: 14px; height: 14px;"></i>
+                  Expires: <span class="fw-semibold text-charcoal">{{ item.expiry_at|time_ago }}</span>
+                </small>
+                <a href="{{ url_for('auth.login') }}" class="btn btn-sm btn-outline-forest rounded-pill px-3">
+                  Claim Item
+                </a>
+              </div>
+            </div>
+          </div>
+        </div>
+      {% else %}
+        <div class="col-12 text-center py-5 text-muted">
+          <i data-lucide="package-open" class="text-sage mb-2" style="width: 48px; height: 48px;"></i>
+          <p class="mb-0">All current surplus food has been successfully matched and allocated! Check back soon or register as a partner.</p>
+        </div>
+      {% endfor %}
+    </div>
+  </div>
+</section>
+
+<!-- Confirmed Philippine Partners Preview -->
+<section class="public-section bg-cream">
+  <div class="container">
+    <div class="text-center max-w-700 mx-auto mb-5" style="max-width: 680px;">
+      <span class="badge bg-forest text-white rounded-pill px-3 py-1 mb-2 font-monospace text-uppercase" style="font-size: 0.75rem;">
+        Collaborative Network
+      </span>
+      <h2 class="font-heading fw-bold text-forest mb-3">Our Philippine Partners</h2>
+      <p class="text-charcoal mb-0">
+        Proudly working alongside licensed bakeries, grocery stores, catering kitchens, and grassroots community pantries.
+      </p>
+    </div>
+
+    <div class="row g-4">
+      {% for p in confirmed_partners %}
+        <div class="col-md-6 col-lg-3">
+          <div class="card h-100 rounded-4 border-0 shadow-sm bg-surface p-3 text-center">
+            <div class="d-inline-flex align-items-center justify-content-center p-3 rounded-circle bg-sage-light text-forest mx-auto mb-3" style="width: 54px; height: 54px;">
+              <i data-lucide="check-circle-2" style="width: 26px; height: 26px; color: var(--clr-leaf);"></i>
+            </div>
+            <h6 class="font-heading fw-bold text-forest mb-1">{{ p.name }}</h6>
+            <span class="badge bg-cream text-forest border mb-2">{{ p.category }}</span>
+            <p class="small text-muted mb-2 text-truncate" title="{{ p.location }}">{{ p.location }}</p>
+            <p class="small text-charcoal mb-0" style="font-size: 0.82rem;">{{ p.description[:90] }}...</p>
+          </div>
+        </div>
+      {% endfor %}
+    </div>
+
+    <div class="text-center mt-5">
+      <a href="{{ url_for('public.partners') }}" class="btn btn-outline-forest rounded-pill px-4">
+        View All Confirmed &amp; Prospective Partners &rarr;
+      </a>
+    </div>
+  </div>
+</section>
+
+<!-- Latest Community News & Updates -->
+<section class="public-section bg-white">
+  <div class="container">
+    <div class="d-flex flex-column flex-md-row justify-content-between align-items-md-end mb-4 gap-2">
+      <div>
+        <span class="badge bg-sage text-forest rounded-pill px-3 py-1 mb-2 font-monospace text-uppercase" style="font-size: 0.75rem;">
+          News &amp; Field Reports
+        </span>
+        <h2 class="font-heading fw-bold text-forest mb-1">Recent Announcements</h2>
+        <p class="text-muted small mb-0">Updates from our community pantries, volunteer routes, and waste prevention initiatives.</p>
+      </div>
+      <div>
+        <a href="{{ url_for('public.news') }}" class="btn btn-outline-forest rounded-pill px-4">
+          All Articles &rarr;
+        </a>
+      </div>
+    </div>
+
+    <div class="row g-4">
+      {% for article in latest_news %}
+        <div class="col-md-4">
+          <div class="card h-100 rounded-4 border-0 shadow-sm bg-surface p-4 d-flex flex-column">
+            <div class="d-flex justify-content-between align-items-center mb-2">
+              <span class="badge bg-sage-light text-forest">{{ article.category }}</span>
+              <small class="text-muted">{{ article.published_at|format_datetime('%b %d, %Y') }}</small>
+            </div>
+            <h5 class="font-heading fw-bold text-forest mb-2">
+              <a href="{{ url_for('public.news_detail', slug=article.slug) }}" class="text-forest text-decoration-none">
+                {{ article.title }}
+              </a>
+            </h5>
+            <p class="small text-muted mb-4">{{ article.excerpt }}</p>
+            <div class="mt-auto">
+              <a href="{{ url_for('public.news_detail', slug=article.slug) }}" class="btn btn-sm btn-outline-forest rounded-pill px-3">
+                Read Article &rarr;
+              </a>
+            </div>
+          </div>
+        </div>
+      {% endfor %}
+    </div>
+  </div>
+</section>
+
+<!-- Call to Action Banner -->
+<section class="py-5 bg-forest text-white">
+  <div class="container text-center py-3">
+    <div class="max-w-700 mx-auto" style="max-width: 680px;">
+      <h2 class="font-heading fw-bold text-white mb-3">Ready to Make Every Meal Count?</h2>
+      <p class="text-white-50 mb-4 fs-6">
+        Whether you run a local food establishment with surplus inventory or coordinate a community feeding program, SurplusShare is free, transparent, and built for community care.
+      </p>
+      <div class="d-flex flex-wrap justify-content-center gap-3">
+        <a href="{{ url_for('auth.register') }}" class="btn btn-leaf btn-lg rounded-pill px-4 shadow-sm">
+          Register Your Organization
+        </a>
+        <a href="{{ url_for('public.contact') }}" class="btn btn-outline-light btn-lg rounded-pill px-4">
+          Contact Our Team
+        </a>
+      </div>
+    </div>
+  </div>
+</section>
+{% endblock %}

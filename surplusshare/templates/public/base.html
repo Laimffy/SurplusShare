@@ -1,0 +1,655 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>{% block title %}SurplusShare — Food Waste Reallocation System{% endblock %}</title>
+
+  <!-- Google Fonts: DM Sans (Interface) & Lora (Headings) -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,400;0,9..40,500;0,9..40,600;0,9..40,700;1,9..40,400&family=Lora:ital,wght@0,400;0,500;0,600;0,700;1,400&display=swap" rel="stylesheet">
+
+  <!-- Bootstrap 5 CSS -->
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+
+  <!-- Lucide Icons -->
+  <script src="https://unpkg.com/lucide@latest"></script>
+
+  <!-- Application CSS -->
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+
+  <style>
+    /* -----------------------------------------------------------------------
+       SurplusShare Public Design System & Navigation Overhaul
+       ----------------------------------------------------------------------- */
+
+    /* Top Announcement / SDG Banner */
+    .public-top-bar {
+      background-color: var(--clr-forest);
+      color: #ffffff;
+      font-size: 0.8125rem;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+    }
+    .public-top-bar a {
+      color: rgba(255, 255, 255, 0.9);
+      text-decoration: none;
+      transition: color 0.15s ease;
+    }
+    .public-top-bar a:hover {
+      color: #ffffff;
+      text-decoration: underline;
+    }
+
+    /* Main Public Navigation Bar */
+    .public-navbar {
+      background-color: #ffffff;
+      border-bottom: 1px solid var(--clr-border);
+      box-shadow: 0 2px 12px rgba(40, 89, 67, 0.05);
+      position: sticky;
+      top: 0;
+      z-index: 1030;
+      transition: background-color 0.2s ease, box-shadow 0.2s ease;
+    }
+    .public-nav-container {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      min-height: 56px;
+    }
+
+    /* Brand Logo & Tagline */
+    .public-brand {
+      text-decoration: none;
+      white-space: nowrap;
+      flex-shrink: 0;
+      display: inline-flex;
+      align-items: center;
+    }
+    .brand-icon-box {
+      width: 38px;
+      height: 38px;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      background-color: var(--clr-forest);
+      color: #ffffff;
+      border-radius: 10px;
+      box-shadow: 0 2px 6px rgba(40, 89, 67, 0.2);
+    }
+    .brand-title {
+      font-size: 1.35rem;
+      letter-spacing: -0.015em;
+      color: var(--clr-forest);
+    }
+    .brand-tagline {
+      font-size: 0.6875rem;
+      color: var(--clr-text-muted);
+      letter-spacing: 0.02em;
+    }
+
+    /* Primary Navigation Links (Desktop) */
+    .public-nav-menu {
+      display: flex;
+      align-items: center;
+      list-style: none;
+      margin: 0;
+      padding: 0;
+      gap: 0.35rem;
+    }
+    .public-nav-link {
+      font-weight: 500;
+      color: var(--clr-charcoal) !important;
+      font-size: 0.9375rem;
+      padding: 0.45rem 0.85rem !important;
+      border-radius: 9999px;
+      white-space: nowrap !important;
+      text-decoration: none;
+      display: inline-flex;
+      align-items: center;
+      line-height: 1.3;
+      transition: color 0.15s ease, background-color 0.15s ease;
+      cursor: pointer;
+    }
+    .public-nav-link:hover {
+      color: var(--clr-forest) !important;
+      background-color: rgba(168, 191, 160, 0.22);
+    }
+    .public-nav-link.active {
+      color: var(--clr-forest) !important;
+      background-color: #EBF3E5; /* Soft sage-green background */
+      font-weight: 600;
+      box-shadow: inset 0 0 0 1px rgba(107, 142, 78, 0.22);
+    }
+
+    /* Accessible Keyboard Focus States */
+    .public-nav-link:focus-visible,
+    .btn-sign-in:focus-visible,
+    .btn-register:focus-visible,
+    .public-hamburger-btn:focus-visible,
+    .public-drawer-link:focus-visible,
+    .public-drawer-sublink:focus-visible,
+    .public-top-bar a:focus-visible {
+      outline: 2px solid var(--clr-leaf) !important;
+      outline-offset: 2px !important;
+      box-shadow: 0 0 0 3px rgba(107, 142, 78, 0.25) !important;
+    }
+
+    /* Desktop Auth Button Group */
+    .public-auth-group {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      flex-shrink: 0;
+    }
+    .btn-sign-in {
+      border: 1.5px solid var(--clr-forest);
+      color: var(--clr-forest);
+      font-size: 0.875rem;
+      font-weight: 600;
+      padding: 0.4rem 1rem;
+      border-radius: 9999px;
+      white-space: nowrap;
+      transition: all 0.18s ease;
+      background-color: transparent;
+    }
+    .btn-sign-in:hover {
+      background-color: var(--clr-forest);
+      color: #ffffff;
+      box-shadow: 0 2px 8px rgba(40, 89, 67, 0.2);
+    }
+    .btn-register {
+      background-color: var(--clr-leaf);
+      border: 1.5px solid var(--clr-leaf);
+      color: #ffffff;
+      font-size: 0.875rem;
+      font-weight: 600;
+      padding: 0.4rem 1.15rem;
+      border-radius: 9999px;
+      white-space: nowrap;
+      box-shadow: 0 2px 8px rgba(107, 142, 78, 0.25);
+      transition: all 0.18s ease;
+    }
+    .btn-register:hover {
+      background-color: #5b7b41;
+      border-color: #5b7b41;
+      color: #ffffff;
+      box-shadow: 0 4px 12px rgba(107, 142, 78, 0.35);
+    }
+
+    /* Mobile Hamburger Trigger */
+    .public-hamburger-btn {
+      background-color: transparent;
+      color: var(--clr-forest);
+      border-radius: 8px;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      width: 42px;
+      height: 42px;
+      transition: background-color 0.15s ease;
+    }
+    .public-hamburger-btn:hover {
+      background-color: rgba(168, 191, 160, 0.2);
+    }
+
+    /* Mobile Offcanvas Drawer */
+    .public-nav-drawer {
+      background-color: var(--clr-surface, #FFFDF8);
+      width: 320px;
+      max-width: 85vw;
+      border-left: 1px solid var(--clr-border);
+      box-shadow: -4px 0 24px rgba(40, 89, 67, 0.12);
+    }
+    .public-drawer-link {
+      display: flex;
+      align-items: center;
+      padding: 0.65rem 0.9rem;
+      border-radius: 10px;
+      font-size: 0.95rem;
+      font-weight: 500;
+      color: var(--clr-charcoal);
+      text-decoration: none;
+      transition: all 0.15s ease;
+    }
+    .public-drawer-link:hover {
+      background-color: rgba(168, 191, 160, 0.22);
+      color: var(--clr-forest);
+    }
+    .public-drawer-link.active {
+      background-color: #EBF3E5; /* Soft sage-green */
+      color: var(--clr-forest);
+      font-weight: 600;
+      box-shadow: inset 0 0 0 1px rgba(107, 142, 78, 0.2);
+    }
+    .public-drawer-sublink {
+      display: flex;
+      align-items: center;
+      padding: 0.5rem 0.9rem;
+      border-radius: 8px;
+      font-size: 0.88rem;
+      color: var(--clr-text-muted);
+      text-decoration: none;
+      transition: all 0.15s ease;
+    }
+    .public-drawer-sublink:hover {
+      background-color: rgba(168, 191, 160, 0.15);
+      color: var(--clr-forest);
+    }
+
+    /* Tablet & Medium Desktop Refinements (992px - 1199px) */
+    @media (min-width: 992px) and (max-width: 1199px) {
+      .public-nav-menu {
+        gap: 0.15rem;
+      }
+      .public-nav-link {
+        font-size: 0.875rem;
+        padding: 0.4rem 0.6rem !important;
+      }
+      .brand-title {
+        font-size: 1.25rem;
+      }
+      .brand-tagline {
+        font-size: 0.625rem;
+      }
+      .btn-sign-in, .btn-register {
+        font-size: 0.8125rem;
+        padding: 0.35rem 0.75rem;
+      }
+    }
+
+    /* Small Mobile Refinements (< 576px / 375px) */
+    @media (max-width: 575px) {
+      .brand-title {
+        font-size: 1.15rem;
+      }
+      .brand-tagline {
+        display: none !important;
+      }
+      .brand-icon-box {
+        width: 32px !important;
+        height: 32px !important;
+      }
+      .brand-icon-box i {
+        width: 18px !important;
+        height: 18px !important;
+      }
+    }
+
+    /* General Public Sections & Footer */
+    .public-hero {
+      background: linear-gradient(135deg, #FAF7EF 0%, #EBF3E5 100%);
+      border-bottom: 1px solid var(--clr-border);
+      padding: 4rem 0 3.5rem;
+    }
+    .public-section {
+      padding: 4.5rem 0;
+    }
+    .public-footer {
+      background: linear-gradient(180deg, #1e4533 0%, #153325 100%);
+      color: rgba(255, 255, 255, 0.85);
+      padding: 4rem 0 2rem;
+      border-top: 4px solid var(--clr-leaf);
+    }
+    .public-footer a {
+      color: rgba(255, 255, 255, 0.75) !important;
+      transition: color 0.15s ease;
+    }
+    .public-footer a:hover {
+      color: #ffffff !important;
+      text-decoration: underline !important;
+    }
+  </style>
+
+  {% block extra_head %}{% endblock %}
+</head>
+<body class="bg-cream d-flex flex-column min-vh-100 font-body">
+
+  <!-- Top Announcement Bar (SDG Focus) -->
+  <div class="public-top-bar py-1 px-3">
+    <div class="container d-flex justify-content-between align-items-center">
+      <div class="d-flex align-items-center">
+        <i data-lucide="heart" class="me-1 text-terracotta flex-shrink-0" style="width: 14px; height: 14px; display: inline-block;"></i>
+        <span class="d-none d-sm-inline">Supporting UN SDG 2 (Zero Hunger) &amp; UN SDG 12 (Responsible Consumption)</span>
+        <span class="d-inline d-sm-none text-truncate">UN SDG 2 (Zero Hunger) &amp; SDG 12</span>
+      </div>
+      <div class="d-none d-md-flex align-items-center gap-3">
+        <span><i data-lucide="map-pin" style="width: 13px; height: 13px;" class="me-1"></i> Metro Manila, Philippines</span>
+        <a href="mailto:contact@surplusshare.ph">
+          <i data-lucide="mail" style="width: 13px; height: 13px;" class="me-1"></i> contact@surplusshare.ph
+        </a>
+      </div>
+    </div>
+  </div>
+
+  <!-- Public Navigation Bar -->
+  <nav class="navbar navbar-expand-lg public-navbar py-2" aria-label="Main Navigation">
+    <div class="container public-nav-container">
+      
+      <!-- Brand Logo & Tagline -->
+      <a class="public-brand gap-2 me-lg-3 me-xl-4" href="{{ url_for('public.home') }}" aria-label="SurplusShare Home">
+        <div class="brand-icon-box flex-shrink-0">
+          <i data-lucide="sprout" style="width: 22px; height: 22px;"></i>
+        </div>
+        <div class="brand-text-box">
+          <span class="font-heading fw-bold brand-title lh-1 d-block">SurplusShare</span>
+          <small class="brand-tagline d-block">Share More. Waste Less.</small>
+        </div>
+      </a>
+
+      <!-- Desktop Nav Links (6 Core Items: Home, About, How It Works, Available Food, Our Impact, Contact) -->
+      <div class="d-none d-lg-flex align-items-center flex-grow-1 justify-content-center">
+        <ul class="public-nav-menu" role="menubar">
+          <li role="none">
+            <a class="public-nav-link {% if request.endpoint == 'public.home' %}active{% endif %}" 
+               href="{{ url_for('public.home') }}" 
+               role="menuitem">Home</a>
+          </li>
+          <li role="none">
+            <a class="public-nav-link {% if request.endpoint == 'public.about' %}active{% endif %}" 
+               href="{{ url_for('public.about') }}" 
+               role="menuitem">About</a>
+          </li>
+          <li role="none">
+            <a class="public-nav-link {% if request.endpoint == 'public.how_it_works' %}active{% endif %}" 
+               href="{{ url_for('public.how_it_works') }}" 
+               role="menuitem">How It Works</a>
+          </li>
+          <li role="none">
+            <a class="public-nav-link {% if request.endpoint == 'public.available_food' %}active{% endif %}" 
+               href="{{ url_for('public.available_food') }}" 
+               role="menuitem">Available Food</a>
+          </li>
+          <li role="none">
+            <a class="public-nav-link {% if request.endpoint == 'public.sustainability' %}active{% endif %}" 
+               href="{{ url_for('public.sustainability') }}" 
+               role="menuitem">Our Impact</a>
+          </li>
+          <li role="none">
+            <a class="public-nav-link {% if request.endpoint == 'public.contact' %}active{% endif %}" 
+               href="{{ url_for('public.contact') }}" 
+               role="menuitem">Contact</a>
+          </li>
+        </ul>
+      </div>
+
+      <!-- Desktop Auth / Portal Actions -->
+      <div class="d-none d-lg-flex align-items-center gap-2 ms-lg-2 ms-xl-3 flex-shrink-0">
+        {% if current_user and current_user.is_authenticated %}
+          <div class="dropdown">
+            <button class="btn btn-outline-forest rounded-pill dropdown-toggle d-flex align-items-center gap-2 py-1 px-3 text-nowrap" type="button" data-bs-toggle="dropdown" aria-expanded="false">
+              <i data-lucide="user" style="width: 15px; height: 15px;"></i>
+              <span>{{ current_user.display_name }}</span>
+              <span class="badge bg-forest text-white text-capitalize" style="font-size: 0.7rem;">{{ current_user.role }}</span>
+            </button>
+            <ul class="dropdown-menu dropdown-menu-end shadow-sm border-0 rounded-3">
+              {% if current_user.role == 'admin' %}
+                <li><a class="dropdown-item fw-semibold text-forest" href="{{ url_for('main.dashboard') }}"><i data-lucide="shield" class="me-2" style="width: 15px; height: 15px;"></i>Admin Dashboard</a></li>
+              {% elif current_user.role == 'donor' %}
+                <li><a class="dropdown-item fw-semibold text-forest" href="{{ url_for('listings.list_listings') }}"><i data-lucide="package" class="me-2" style="width: 15px; height: 15px;"></i>Donor Portal</a></li>
+              {% elif current_user.role == 'recipient' %}
+                <li><a class="dropdown-item fw-semibold text-forest" href="{{ url_for('requests_bp.list_requests') }}"><i data-lucide="heart-handshake" class="me-2" style="width: 15px; height: 15px;"></i>Recipient Portal</a></li>
+              {% elif current_user.role == 'volunteer' %}
+                <li><a class="dropdown-item fw-semibold text-forest" href="{{ url_for('schedule.list_schedules') }}"><i data-lucide="truck" class="me-2" style="width: 15px; height: 15px;"></i>Volunteer Portal</a></li>
+              {% endif %}
+              <li><hr class="dropdown-divider"></li>
+              <li><a class="dropdown-item text-danger" href="{{ url_for('auth.logout') }}"><i data-lucide="log-out" class="me-2" style="width: 15px; height: 15px;"></i>Sign Out</a></li>
+            </ul>
+          </div>
+        {% else %}
+          <a href="{{ url_for('auth.login') }}" class="btn-sign-in">
+            <i data-lucide="log-in" class="me-1" style="width: 15px; height: 15px;"></i> Sign In
+          </a>
+          <a href="{{ url_for('auth.register') }}" class="btn-register">
+            <i data-lucide="user-plus" class="me-1" style="width: 15px; height: 15px;"></i> Register
+          </a>
+        {% endif %}
+      </div>
+
+      <!-- Mobile Hamburger Button (Visible on tablet & mobile < 992px) -->
+      <button class="public-hamburger-btn d-lg-none border-0 p-2 shadow-none" 
+              type="button" 
+              data-bs-toggle="offcanvas" 
+              data-bs-target="#publicNavDrawer" 
+              aria-controls="publicNavDrawer" 
+              aria-label="Toggle navigation drawer">
+        <i data-lucide="menu" style="width: 26px; height: 26px;"></i>
+      </button>
+
+    </div>
+  </nav>
+
+  <!-- Accessible Mobile Navigation Drawer (Offcanvas) -->
+  <div class="offcanvas offcanvas-end public-nav-drawer" tabindex="-1" id="publicNavDrawer" aria-labelledby="publicNavDrawerLabel">
+    <div class="offcanvas-header border-bottom py-3 px-4">
+      <div class="d-flex align-items-center gap-2" id="publicNavDrawerLabel">
+        <div class="brand-icon-box" style="width: 34px; height: 34px;">
+          <i data-lucide="sprout" style="width: 18px; height: 18px;"></i>
+        </div>
+        <div>
+          <span class="font-heading fw-bold text-forest fs-5 lh-1 d-block">SurplusShare</span>
+          <small class="text-muted d-block" style="font-size: 0.6875rem;">Share More. Waste Less.</small>
+        </div>
+      </div>
+      <button type="button" class="btn-close text-reset shadow-none" data-bs-dismiss="offcanvas" aria-label="Close navigation drawer"></button>
+    </div>
+
+    <div class="offcanvas-body d-flex flex-column p-4">
+      <!-- Section 1: Core Navigation Links -->
+      <div class="mb-4">
+        <div class="text-uppercase text-muted fw-bold mb-2 small" style="font-size: 0.72rem; letter-spacing: 0.08em;">Navigation</div>
+        <nav class="nav flex-column gap-1" aria-label="Mobile Main Navigation">
+          <a class="public-drawer-link {% if request.endpoint == 'public.home' %}active{% endif %}" href="{{ url_for('public.home') }}">
+            <i data-lucide="home" class="me-2" style="width: 18px; height: 18px;"></i>
+            <span>Home</span>
+          </a>
+          <a class="public-drawer-link {% if request.endpoint == 'public.about' %}active{% endif %}" href="{{ url_for('public.about') }}">
+            <i data-lucide="info" class="me-2" style="width: 18px; height: 18px;"></i>
+            <span>About</span>
+          </a>
+          <a class="public-drawer-link {% if request.endpoint == 'public.how_it_works' %}active{% endif %}" href="{{ url_for('public.how_it_works') }}">
+            <i data-lucide="git-merge" class="me-2" style="width: 18px; height: 18px;"></i>
+            <span>How It Works</span>
+          </a>
+          <a class="public-drawer-link {% if request.endpoint == 'public.available_food' %}active{% endif %}" href="{{ url_for('public.available_food') }}">
+            <i data-lucide="package" class="me-2" style="width: 18px; height: 18px;"></i>
+            <span>Available Food</span>
+          </a>
+          <a class="public-drawer-link {% if request.endpoint == 'public.sustainability' %}active{% endif %}" href="{{ url_for('public.sustainability') }}">
+            <i data-lucide="activity" class="me-2" style="width: 18px; height: 18px;"></i>
+            <span>Our Impact</span>
+          </a>
+          <a class="public-drawer-link {% if request.endpoint == 'public.contact' %}active{% endif %}" href="{{ url_for('public.contact') }}">
+            <i data-lucide="mail" class="me-2" style="width: 18px; height: 18px;"></i>
+            <span>Contact</span>
+          </a>
+        </nav>
+      </div>
+
+      <!-- Section 2: Explore More (Partners, News, FAQs) -->
+      <div class="mb-4 pt-3 border-top">
+        <div class="text-uppercase text-muted fw-bold mb-2 small" style="font-size: 0.72rem; letter-spacing: 0.08em;">Explore More</div>
+        <nav class="nav flex-column gap-1" aria-label="Mobile Secondary Navigation">
+          <a class="public-drawer-sublink" href="{{ url_for('public.partners') }}">
+            <i data-lucide="store" class="me-2" style="width: 16px; height: 16px;"></i>
+            <span>Our Philippine Partners</span>
+          </a>
+          <a class="public-drawer-sublink" href="{{ url_for('public.news') }}">
+            <i data-lucide="newspaper" class="me-2" style="width: 16px; height: 16px;"></i>
+            <span>News &amp; Stories</span>
+          </a>
+          <a class="public-drawer-sublink" href="{{ url_for('public.faqs') }}">
+            <i data-lucide="help-circle" class="me-2" style="width: 16px; height: 16px;"></i>
+            <span>Frequently Asked Questions</span>
+          </a>
+        </nav>
+      </div>
+
+      <!-- Section 3: Auth & Portal Access in Drawer -->
+      <div class="mt-auto pt-3 border-top">
+        {% if current_user and current_user.is_authenticated %}
+          <div class="p-3 bg-cream rounded-3 border mb-3">
+            <div class="d-flex align-items-center justify-content-between mb-2">
+              <span class="fw-bold text-forest">{{ current_user.display_name }}</span>
+              <span class="badge bg-forest text-white text-capitalize">{{ current_user.role }}</span>
+            </div>
+            {% if current_user.role == 'admin' %}
+              <a href="{{ url_for('main.dashboard') }}" class="btn btn-sm btn-outline-forest w-100 mb-2 rounded-pill">
+                <i data-lucide="shield" class="me-1" style="width: 14px; height: 14px;"></i> Admin Dashboard
+              </a>
+            {% elif current_user.role == 'donor' %}
+              <a href="{{ url_for('listings.list_listings') }}" class="btn btn-sm btn-outline-forest w-100 mb-2 rounded-pill">
+                <i data-lucide="package" class="me-1" style="width: 14px; height: 14px;"></i> Donor Portal
+              </a>
+            {% elif current_user.role == 'recipient' %}
+              <a href="{{ url_for('requests_bp.list_requests') }}" class="btn btn-sm btn-outline-forest w-100 mb-2 rounded-pill">
+                <i data-lucide="heart-handshake" class="me-1" style="width: 14px; height: 14px;"></i> Recipient Portal
+              </a>
+            {% elif current_user.role == 'volunteer' %}
+              <a href="{{ url_for('schedule.list_schedules') }}" class="btn btn-sm btn-outline-forest w-100 mb-2 rounded-pill">
+                <i data-lucide="truck" class="me-1" style="width: 14px; height: 14px;"></i> Volunteer Portal
+              </a>
+            {% endif %}
+            <a href="{{ url_for('auth.logout') }}" class="btn btn-sm btn-outline-danger w-100 rounded-pill">
+              <i data-lucide="log-out" class="me-1" style="width: 14px; height: 14px;"></i> Sign Out
+            </a>
+          </div>
+        {% else %}
+          <div class="d-grid gap-2">
+            <a href="{{ url_for('auth.login') }}" class="btn-sign-in text-center py-2">
+              <i data-lucide="log-in" class="me-1" style="width: 15px; height: 15px;"></i> Sign In
+            </a>
+            <a href="{{ url_for('auth.register') }}" class="btn-register text-center py-2">
+              <i data-lucide="user-plus" class="me-1" style="width: 15px; height: 15px;"></i> Register Organization
+            </a>
+          </div>
+        {% endif %}
+      </div>
+
+    </div>
+  </div>
+
+  <!-- Flash Message Container -->
+  {% with messages = get_flashed_messages(with_categories=true) %}
+    {% if messages %}
+      <div class="container mt-3">
+        {% for category, message in messages %}
+          <div class="alert alert-{{ 'success' if category == 'success' else ('danger' if category in ('error', 'danger') else 'info') }} alert-dismissible fade show rounded-3 shadow-sm" role="alert">
+            <i data-lucide="{{ 'check-circle' if category == 'success' else ('alert-circle' if category in ('error', 'danger') else 'info') }}" class="me-2" style="width: 18px; height: 18px;"></i>
+            {{ message }}
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+          </div>
+        {% endfor %}
+      </div>
+    {% endif %}
+  {% endwith %}
+
+  <!-- Main Public Content Block -->
+  <main class="flex-grow-1">
+    {% block content %}{% endblock %}
+  </main>
+
+  <!-- Public Footer (Organized into Clear Informational Pillars) -->
+  <footer class="public-footer mt-auto">
+    <div class="container">
+      <div class="row g-4 mb-4">
+        <!-- Col 1: About & Mission -->
+        <div class="col-lg-4">
+          <div class="d-flex align-items-center gap-2 mb-3">
+            <div class="brand-icon-box" style="width: 36px; height: 36px; background-color: var(--clr-leaf);">
+              <i data-lucide="sprout" style="width: 20px; height: 20px;"></i>
+            </div>
+            <h4 class="font-heading fw-bold text-white mb-0">SurplusShare</h4>
+          </div>
+          <p class="small text-white-50 mb-3">
+            "Share More. Waste Less. Nourish Communities."
+          </p>
+          <p class="small text-white-50">
+            A practical food redistribution platform connecting restaurants, bakeries, grocers, and caterers with community pantries, feeding programs, and shelters across the Philippines.
+          </p>
+          <div class="d-flex flex-wrap gap-2">
+            <span class="badge bg-leaf text-white px-2 py-1 small">UN SDG 2: Zero Hunger</span>
+            <span class="badge bg-sage text-forest px-2 py-1 small">UN SDG 12: Circular Economy</span>
+          </div>
+        </div>
+
+        <!-- Col 2: Navigation Links -->
+        <div class="col-6 col-md-3 col-lg-2">
+          <h6 class="font-heading fw-bold text-white mb-3">Explore</h6>
+          <ul class="list-unstyled small mb-0 d-flex flex-column gap-2">
+            <li><a href="{{ url_for('public.home') }}">Home</a></li>
+            <li><a href="{{ url_for('public.about') }}">About Us</a></li>
+            <li><a href="{{ url_for('public.how_it_works') }}">How It Works</a></li>
+            <li><a href="{{ url_for('public.available_food') }}">Available Food</a></li>
+            <li><a href="{{ url_for('public.sustainability') }}">Our Impact</a></li>
+            <li><a href="{{ url_for('public.contact') }}">Contact Us</a></li>
+          </ul>
+        </div>
+
+        <!-- Col 3: Programs & Partners -->
+        <div class="col-6 col-md-3 col-lg-2">
+          <h6 class="font-heading fw-bold text-white mb-3">Community</h6>
+          <ul class="list-unstyled small mb-0 d-flex flex-column gap-2">
+            <li><a href="{{ url_for('public.partners') }}">Our Philippine Partners</a></li>
+            <li><a href="{{ url_for('public.news') }}">News &amp; Updates</a></li>
+            <li><a href="{{ url_for('public.faqs') }}">Frequently Asked Questions</a></li>
+            <li><a href="{{ url_for('public.sustainability') }}">Sustainability &amp; SDG Goals</a></li>
+          </ul>
+        </div>
+
+        <!-- Col 4: Portals & Contact Info -->
+        <div class="col-lg-4">
+          <h6 class="font-heading fw-bold text-white mb-3">Project Office &amp; Access</h6>
+          <ul class="list-unstyled small text-white-50 mb-3 d-flex flex-column gap-2">
+            <li class="d-flex align-items-start gap-2">
+              <i data-lucide="map-pin" class="text-sage flex-shrink-0 mt-1" style="width: 16px; height: 16px;"></i>
+              <span>SurplusShare Food Rescue Hub, Maginhawa St., Diliman, Quezon City, Metro Manila, Philippines</span>
+            </li>
+            <li class="d-flex align-items-center gap-2">
+              <i data-lucide="mail" class="text-sage flex-shrink-0" style="width: 16px; height: 16px;"></i>
+              <span>contact@surplusshare.ph</span>
+            </li>
+            <li class="d-flex align-items-center gap-2">
+              <i data-lucide="phone" class="text-sage flex-shrink-0" style="width: 16px; height: 16px;"></i>
+              <span>+63 (2) 8920-5301 / +63 917 123 4567</span>
+            </li>
+          </ul>
+          <div class="d-flex gap-2">
+            <a href="{{ url_for('auth.login') }}" class="btn btn-sm btn-outline-light rounded-pill px-3">
+              <i data-lucide="log-in" class="me-1" style="width: 13px; height: 13px;"></i> Sign In
+            </a>
+            <a href="{{ url_for('auth.register') }}" class="btn btn-sm btn-leaf rounded-pill px-3">
+              <i data-lucide="user-plus" class="me-1" style="width: 13px; height: 13px;"></i> Register
+            </a>
+          </div>
+        </div>
+      </div>
+
+      <hr class="border-secondary my-4">
+
+      <div class="d-flex flex-column flex-md-row justify-content-between align-items-center small text-white-50 gap-2">
+        <span>&copy; {{ current_year }} SurplusShare — Food Waste Reallocation System. All rights reserved.</span>
+        <div class="d-flex gap-3">
+          <a href="{{ url_for('public.about') }}">Privacy &amp; Safety</a>
+          <a href="{{ url_for('public.faqs') }}">Redistribution Terms</a>
+          <a href="{{ url_for('auth.login') }}">Admin Login</a>
+        </div>
+      </div>
+    </div>
+  </footer>
+
+  <!-- Bootstrap 5 Bundle JS (Includes Popper & Offcanvas) -->
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+
+  <!-- Lucide Icon Initialization -->
+  <script>
+    document.addEventListener('DOMContentLoaded', () => {
+      if (window.lucide) {
+        window.lucide.createIcons();
+      }
+    });
+  </script>
+
+  {% block extra_js %}{% endblock %}
+</body>
+</html>

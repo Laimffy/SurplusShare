@@ -1,0 +1,72 @@
+{% extends "public/base.html" %}
+
+{% block title %}{{ article.title }} — SurplusShare{% endblock %}
+
+{% block content %}
+<div class="container py-5" style="max-width: 860px;">
+  <!-- Breadcrumb -->
+  <nav aria-label="breadcrumb" class="mb-4">
+    <ol class="breadcrumb small">
+      <li class="breadcrumb-item"><a href="{{ url_for('public.home') }}" class="text-forest text-decoration-none">Home</a></li>
+      <li class="breadcrumb-item"><a href="{{ url_for('public.news') }}" class="text-forest text-decoration-none">News</a></li>
+      <li class="breadcrumb-item active text-truncate" style="max-width: 300px;" aria-current="page">{{ article.title }}</li>
+    </ol>
+  </nav>
+
+  <!-- Article Header -->
+  <div class="mb-4">
+    <div class="d-flex align-items-center gap-2 mb-2">
+      <span class="badge bg-leaf text-white">{{ article.category }}</span>
+      <span class="text-muted small">&bull; Published on {{ article.published_at|format_datetime('%B %d, %Y') }}</span>
+      <span class="text-muted small">&bull; By {{ article.author_name }}</span>
+    </div>
+    <h1 class="font-heading display-6 fw-bold text-forest mb-3">{{ article.title }}</h1>
+    {% if article.excerpt %}
+      <p class="fs-5 text-muted fst-italic mb-4 border-start border-3 border-leaf ps-3">
+        {{ article.excerpt }}
+      </p>
+    {% endif %}
+  </div>
+
+  <hr class="mb-4">
+
+  <!-- Article Body -->
+  <div class="article-content text-charcoal lh-lg mb-5" style="font-size: 1.05rem;">
+    <p>{{ article.content }}</p>
+  </div>
+
+  <!-- Share & Back Actions -->
+  <div class="p-4 bg-surface rounded-4 border shadow-sm d-flex flex-column flex-md-row justify-content-between align-items-md-center gap-3 mb-5">
+    <div>
+      <span class="fw-bold text-forest d-block">SurplusShare Community Desk</span>
+      <small class="text-muted">Working towards UN SDG 2 (Zero Hunger) &amp; SDG 12 (Responsible Consumption).</small>
+    </div>
+    <div class="d-flex gap-2">
+      <a href="{{ url_for('public.news') }}" class="btn btn-outline-forest rounded-pill px-4">
+        &larr; Back to News
+      </a>
+      <a href="{{ url_for('public.contact') }}" class="btn btn-leaf rounded-pill px-4">
+        Share a Story
+      </a>
+    </div>
+  </div>
+
+  <!-- Related News -->
+  {% if related %}
+    <h4 class="font-heading fw-bold text-forest mb-3">Related Announcements</h4>
+    <div class="row g-3">
+      {% for r in related %}
+        <div class="col-md-4">
+          <div class="p-3 bg-surface rounded-3 border h-100 d-flex flex-column">
+            <span class="badge bg-sage-light text-forest align-self-start mb-2 small">{{ r.category }}</span>
+            <a href="{{ url_for('public.news_detail', slug=r.slug) }}" class="fw-bold text-forest text-decoration-none small mb-2 flex-grow-1">
+              {{ r.title }}
+            </a>
+            <small class="text-muted">{{ r.published_at|format_datetime('%b %d, %Y') }}</small>
+          </div>
+        </div>
+      {% endfor %}
+    </div>
+  {% endif %}
+</div>
+{% endblock %}

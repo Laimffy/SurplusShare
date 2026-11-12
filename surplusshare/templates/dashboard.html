@@ -1,0 +1,491 @@
+{% extends "base.html" %}
+
+{% block title %}{{ dashboard_title or 'Dashboard' }} — SurplusShare Food Waste Reallocation{% endblock %}
+{% block page_title %}{{ dashboard_title or 'Sustainability Dashboard' }}{% endblock %}
+
+{% block content %}
+<div class="dashboard-page-container">
+  <!-- 1. Photographic Hero Section (Split Layout) -->
+  <div class="hero-split-card card border-0 rounded-4 shadow-sm mb-4 overflow-hidden bg-surface">
+    <div class="row g-0 align-items-center">
+      <!-- Left Column: Copy & Actions -->
+      <div class="col-lg-6 col-xl-7 p-4 p-md-5">
+        <div class="hero-text-content">
+          <div class="d-inline-flex align-items-center gap-2 px-3 py-1 rounded-pill bg-sage-light text-forest mb-3 small fw-semibold">
+            <i data-lucide="sprout" style="width: 15px; height: 15px;"></i>
+            <span>{{ dashboard_badge or 'Careit-Inspired Community Food Rescue • UN SDG 2 & 12' }}</span>
+          </div>
+
+          <h1 class="hero-main-title display-6 fw-bold font-heading text-forest mb-3">
+            {{ dashboard_hero_title or 'Good Food Deserves a Second Chance.' }}
+          </h1>
+
+          <p class="hero-main-subtitle lead text-muted mb-4" style="font-size: 1.05rem; line-height: 1.6;">
+            {{ dashboard_subtitle or 'Connect surplus food with communities that need it. Reduce waste, share resources, and make every meal count through fair, algorithmic redistribution.' }}
+          </p>
+
+          <div class="hero-action-buttons d-flex flex-wrap gap-3">
+            {% if current_user.role == 'donor' %}
+              <a href="{{ url_for('listings.new_listing') }}" class="btn btn-leaf btn-lg rounded-pill px-4 shadow-sm">
+                <i data-lucide="plus-circle" class="me-1"></i> Post Surplus Food
+              </a>
+              <a href="{{ url_for('listings.list_listings') }}" class="btn btn-outline-forest btn-lg rounded-pill px-4">
+                <i data-lucide="package" class="me-1"></i> My Food Listings
+              </a>
+              <a href="{{ url_for('schedule.list_schedules') }}" class="btn btn-link text-forest text-decoration-none d-inline-flex align-items-center fw-semibold">
+                <i data-lucide="truck" class="me-1"></i> Pickups &amp; Handover &rarr;
+              </a>
+            {% elif current_user.role == 'recipient' %}
+              <a href="{{ url_for('requests_bp.new_request') }}" class="btn btn-leaf btn-lg rounded-pill px-4 shadow-sm">
+                <i data-lucide="plus-circle" class="me-1"></i> Request Food
+              </a>
+              <a href="{{ url_for('public.available_food') }}" class="btn btn-outline-forest btn-lg rounded-pill px-4">
+                <i data-lucide="shopping-bag" class="me-1"></i> Browse Available Food
+              </a>
+              <a href="{{ url_for('requests_bp.list_requests') }}" class="btn btn-link text-forest text-decoration-none d-inline-flex align-items-center fw-semibold">
+                <i data-lucide="heart-handshake" class="me-1"></i> My Requests Status &rarr;
+              </a>
+            {% elif current_user.role == 'volunteer' %}
+              <a href="{{ url_for('schedule.list_schedules') }}" class="btn btn-leaf btn-lg rounded-pill px-4 shadow-sm">
+                <i data-lucide="truck" class="me-1"></i> My Assigned Pickups
+              </a>
+              <a href="{{ url_for('schedule.list_schedules') }}" class="btn btn-outline-forest btn-lg rounded-pill px-4">
+                <i data-lucide="map-pin" class="me-1"></i> Route Checklist
+              </a>
+            {% else %}
+              <a href="{{ url_for('listings.new_listing') }}" class="btn btn-leaf btn-lg rounded-pill px-4 shadow-sm">
+                <i data-lucide="plus-circle" class="me-1"></i> Post Surplus Food
+              </a>
+              <a href="{{ url_for('requests_bp.list_requests') }}" class="btn btn-outline-forest btn-lg rounded-pill px-4">
+                <i data-lucide="heart-handshake" class="me-1"></i> View Food Requests
+              </a>
+              <a href="{{ url_for('matching.matching_page') }}" class="btn btn-link text-forest text-decoration-none d-inline-flex align-items-center fw-semibold">
+                <i data-lucide="shuffle" class="me-1"></i> Run Matching &rarr;
+              </a>
+            {% endif %}
+          </div>
+        </div>
+      </div>
+
+      <!-- Right Column: Warm Harmonized Photograph with Fallback -->
+      <div class="col-lg-6 col-xl-5 p-3 p-md-4">
+        <div class="hero-photo-frame position-relative rounded-4 overflow-hidden shadow-sm">
+          <img src="{{ url_for('static', filename='images/hero-food-rescue.jpg') }}" 
+               alt="Community volunteers organizing fresh surplus bread and vegetables in reusable crates for local food redistribution"
+               class="hero-photo img-fluid w-100 object-fit-cover"
+               onerror="this.onerror=null; this.src='{{ url_for('static', filename='images/hero-fallback.svg') }}';"
+               style="min-height: 280px; max-height: 360px; object-fit: cover;">
+          <div class="hero-photo-badge position-absolute bottom-0 start-0 m-3 px-3 py-1 rounded-pill bg-forest text-white small shadow-sm d-flex align-items-center gap-1 opacity-90">
+            <i data-lucide="award" style="width: 14px; height: 14px;"></i>
+            <span>Local Community Food Rescue</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 2. Four Primary Statistic Cards (Role-Tailored) -->
+  <div class="row g-3 g-md-4 mb-4">
+    <!-- Stat 1 -->
+    <div class="col-6 col-lg-3">
+      <div class="card stat-card stat-card--leaf h-100 border-0 rounded-4 shadow-sm bg-surface p-3 p-md-4">
+        <div class="d-flex justify-content-between align-items-center mb-2">
+          <span class="stat-card-label text-muted small fw-semibold text-uppercase">
+            {% if current_user.role == 'donor' %}My Available Surplus
+            {% elif current_user.role == 'recipient' %}Available to Request
+            {% elif current_user.role == 'volunteer' %}My Routes
+            {% else %}Available Listings{% endif %}
+          </span>
+          <div class="stat-icon-wrapper bg-leaf-light rounded-circle p-2 text-forest">
+            <i data-lucide="package" style="width: 20px; height: 20px;"></i>
+          </div>
+        </div>
+        <div class="stat-card-value display-6 fw-bold text-forest mb-1">
+          {% if current_user.role == 'volunteer' %}{{ stats.scheduled_pickups }}
+          {% else %}{{ stats.available_listings }}{% endif %}
+        </div>
+        <div class="stat-card-sub text-muted small">
+          {% if current_user.role == 'donor' %}<span class="text-leaf fw-semibold">&bull; {{ stats.total_listings }} total</span> posted
+          {% elif current_user.role == 'recipient' %}<span class="text-leaf fw-semibold">&bull; Fresh food</span> ready
+          {% elif current_user.role == 'volunteer' %}<span class="text-leaf fw-semibold">&bull; Assigned</span> delivery runs
+          {% else %}<span class="text-leaf fw-semibold">&bull; {{ stats.total_listings }} total</span> surplus posted{% endif %}
+        </div>
+      </div>
+    </div>
+
+    <!-- Stat 2 -->
+    <div class="col-6 col-lg-3">
+      <div class="card stat-card stat-card--sage h-100 border-0 rounded-4 shadow-sm bg-surface p-3 p-md-4">
+        <div class="d-flex justify-content-between align-items-center mb-2">
+          <span class="stat-card-label text-muted small fw-semibold text-uppercase">
+            {% if current_user.role == 'donor' %}Expiring Soon (<24h)
+            {% elif current_user.role == 'recipient' %}My Pending Requests
+            {% elif current_user.role == 'volunteer' %}Pending Stops
+            {% else %}Pending Requests{% endif %}
+          </span>
+          <div class="stat-icon-wrapper bg-sage-light rounded-circle p-2 text-forest">
+            <i data-lucide="{% if current_user.role == 'donor' %}alert-triangle{% elif current_user.role == 'volunteer' %}map-pin{% else %}heart-handshake{% endif %}" style="width: 20px; height: 20px;"></i>
+          </div>
+        </div>
+        <div class="stat-card-value display-6 fw-bold text-charcoal mb-1">
+          {% if current_user.role == 'donor' %}{{ stats.expiring_soon }}
+          {% elif current_user.role == 'volunteer' %}{{ stats.pending_stops or 0 }}
+          {% else %}{{ stats.pending_requests }}{% endif %}
+        </div>
+        <div class="stat-card-sub text-muted small">
+          {% if current_user.role == 'donor' %}<span class="text-terracotta fw-semibold">&bull; Urgent</span> action needed
+          {% elif current_user.role == 'volunteer' %}<span class="text-leaf fw-semibold">&bull; To visit</span> today
+          {% else %}<span class="text-sage-dark fw-semibold">&bull; Waiting</span> in FIFO queue{% endif %}
+        </div>
+      </div>
+    </div>
+
+    <!-- Stat 3 -->
+    <div class="col-6 col-lg-3">
+      <div class="card stat-card stat-card--gold h-100 border-0 rounded-4 shadow-sm bg-surface p-3 p-md-4">
+        <div class="d-flex justify-content-between align-items-center mb-2">
+          <span class="stat-card-label text-muted small fw-semibold text-uppercase">
+            {% if current_user.role == 'donor' %}My Rescued Food
+            {% elif current_user.role == 'recipient' %}Food Received
+            {% elif current_user.role == 'volunteer' %}Completed Stops
+            {% else %}Rescued Food{% endif %}
+          </span>
+          <div class="stat-icon-wrapper bg-gold-light rounded-circle p-2 text-forest">
+            <i data-lucide="{% if current_user.role == 'volunteer' %}check-circle-2{% else %}award{% endif %}" style="width: 20px; height: 20px;"></i>
+          </div>
+        </div>
+        <div class="stat-card-value display-6 fw-bold text-gold mb-1">
+          {% if current_user.role == 'volunteer' %}{{ stats.completed_stops or 0 }}
+          {% elif stats.rescued_kg is defined %}{{ stats.rescued_kg }} kg
+          {% else %}{{ stats.total_quantity_allocated|round(1) }} kg{% endif %}
+        </div>
+        <div class="stat-card-sub text-muted small">
+          {% if current_user.role == 'donor' %}<span class="text-gold fw-semibold">&bull; Diverted</span> from landfill
+          {% elif current_user.role == 'volunteer' %}<span class="text-gold fw-semibold">&bull; Picked up</span> successfully
+          {% elif current_user.role == 'recipient' %}<span class="text-gold fw-semibold">&bull; Nourished</span> families
+          {% else %}<span class="text-gold fw-semibold">&bull; {{ stats.total_allocations }}</span> matches fulfilled{% endif %}
+        </div>
+      </div>
+    </div>
+
+    <!-- Stat 4 -->
+    <div class="col-6 col-lg-3">
+      <div class="card stat-card stat-card--terra h-100 border-0 rounded-4 shadow-sm bg-surface p-3 p-md-4">
+        <div class="d-flex justify-content-between align-items-center mb-2">
+          <span class="stat-card-label text-muted small fw-semibold text-uppercase">
+            {% if current_user.role == 'donor' %}Scheduled Pickups
+            {% elif current_user.role == 'recipient' %}Incoming Deliveries
+            {% elif current_user.role == 'volunteer' %}Volunteer Shift
+            {% else %}Scheduled Pickups{% endif %}
+          </span>
+          <div class="stat-icon-wrapper bg-terracotta-light rounded-circle p-2 text-white">
+            <i data-lucide="truck" style="width: 20px; height: 20px;"></i>
+          </div>
+        </div>
+        <div class="stat-card-value display-6 fw-bold text-terracotta mb-1">{{ stats.scheduled_pickups }}</div>
+        <div class="stat-card-sub text-muted small">
+          {% if current_user.role == 'volunteer' %}<span class="text-terracotta fw-semibold">&bull; Active</span> dispatch
+          {% else %}<span class="text-terracotta fw-semibold">&bull; Coordinated</span> routes{% endif %}
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 3. Food Redistribution 6-Step Workflow Visual Progress Bar -->
+  <div class="card rounded-4 shadow-sm border-0 bg-surface mb-4 p-4">
+    <div class="d-flex justify-content-between align-items-center mb-3">
+      <div>
+        <h5 class="fw-bold font-heading text-forest mb-0">End-to-End Redistribution Workflow</h5>
+        <small class="text-muted">How SurplusShare orchestrates community surplus into meals using algorithms</small>
+      </div>
+      <span class="badge bg-sage text-forest rounded-pill px-3 py-1 font-monospace">Deterministic Pipeline</span>
+    </div>
+
+    <div class="workflow-steps-horizontal d-flex flex-wrap flex-md-nowrap gap-2 justify-content-between text-center pt-2">
+      <div class="workflow-step-item flex-fill p-2 rounded bg-cream border">
+        <span class="badge bg-forest text-white rounded-circle p-1 mb-1" style="width: 22px; height: 22px;">1</span>
+        <strong class="d-block small text-forest">Donor Post</strong>
+        <span class="text-muted" style="font-size: 0.72rem;">Expiry logged</span>
+      </div>
+      <div class="workflow-step-connector d-none d-md-flex align-items-center text-muted">&rarr;</div>
+
+      <div class="workflow-step-item flex-fill p-2 rounded bg-cream border">
+        <span class="badge bg-forest text-white rounded-circle p-1 mb-1" style="width: 22px; height: 22px;">2</span>
+        <strong class="d-block small text-forest">FIFO Request</strong>
+        <span class="text-muted" style="font-size: 0.72rem;">Queued in order</span>
+      </div>
+      <div class="workflow-step-connector d-none d-md-flex align-items-center text-muted">&rarr;</div>
+
+      <div class="workflow-step-item flex-fill p-2 rounded bg-cream border">
+        <span class="badge bg-forest text-white rounded-circle p-1 mb-1" style="width: 22px; height: 22px;">3</span>
+        <strong class="d-block small text-forest">Merge Sort</strong>
+        <span class="text-muted" style="font-size: 0.72rem;">Soonest expiry first</span>
+      </div>
+      <div class="workflow-step-connector d-none d-md-flex align-items-center text-muted">&rarr;</div>
+
+      <div class="workflow-step-item flex-fill p-2 rounded bg-cream border">
+        <span class="badge bg-forest text-white rounded-circle p-1 mb-1" style="width: 22px; height: 22px;">4</span>
+        <strong class="d-block small text-forest">Fair Allocation</strong>
+        <span class="text-muted" style="font-size: 0.72rem;">Partial or full</span>
+      </div>
+      <div class="workflow-step-connector d-none d-md-flex align-items-center text-muted">&rarr;</div>
+
+      <div class="workflow-step-item flex-fill p-2 rounded bg-cream border">
+        <span class="badge bg-forest text-white rounded-circle p-1 mb-1" style="width: 22px; height: 22px;">5</span>
+        <strong class="d-block small text-forest">Doubly Linked Route</strong>
+        <span class="text-muted" style="font-size: 0.72rem;">Volunteer pickup</span>
+      </div>
+      <div class="workflow-step-connector d-none d-md-flex align-items-center text-muted">&rarr;</div>
+
+      <div class="workflow-step-item flex-fill p-2 rounded bg-cream border">
+        <span class="badge bg-leaf text-white rounded-circle p-1 mb-1" style="width: 22px; height: 22px;">6</span>
+        <strong class="d-block small text-leaf">Food Rescued!</strong>
+        <span class="text-muted" style="font-size: 0.72rem;">Reports update</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- 4. Main Two-Column Row -->
+  <div class="row g-4 mb-4">
+    <!-- Left Column: Recent Listings & Redistribution Chart -->
+    <div class="col-lg-8">
+      <!-- Recent Food Listings Card -->
+      <div class="card rounded-4 shadow-sm border-0 bg-surface mb-4">
+        <div class="card-header bg-transparent border-bottom d-flex justify-content-between align-items-center py-3">
+          <div class="d-flex align-items-center gap-2">
+            <i data-lucide="package" class="text-forest"></i>
+            <h5 class="mb-0 fw-bold font-heading text-forest">Recent Food Listings</h5>
+          </div>
+          <a href="{{ url_for('listings.list_listings') }}" class="btn btn-sm btn-outline-forest rounded-pill px-3">
+            View All Listings &rarr;
+          </a>
+        </div>
+        <div class="card-body p-0">
+          <div class="table-responsive">
+            <table class="table table-hover align-middle mb-0 custom-table">
+              <thead class="table-light small text-muted text-uppercase">
+                <tr>
+                  <th>Food Item</th>
+                  <th>Category</th>
+                  <th>Quantity</th>
+                  <th>Donor</th>
+                  <th>Expiry Window</th>
+                  <th>Status</th>
+                  <th class="text-end">Action</th>
+                </tr>
+              </thead>
+              <tbody>
+                {% for item in recent_listings %}
+                  <tr>
+                    <td>
+                      <div class="fw-semibold text-charcoal">{{ item.food_name }}</div>
+                      <small class="text-muted font-monospace">{{ item.listing_id }}</small>
+                    </td>
+                    <td>
+                      <span class="badge bg-sage-light text-forest">{{ item.category }}</span>
+                    </td>
+                    <td>
+                      <span class="fw-bold">{{ item.quantity }}</span> <small class="text-muted">{{ item.unit }}</small>
+                    </td>
+                    <td>
+                      <small class="text-muted d-block text-truncate" style="max-width: 130px;">{{ item.donor_name }}</small>
+                    </td>
+                    <td>
+                      <span data-expiry-timestamp="{{ item.expiry_at }}" class="badge badge-{{ item.expiry_at|expiry_status }}">
+                        {{ item.expiry_at|time_ago }}
+                      </span>
+                    </td>
+                    <td>
+                      {% if item.status == 'available' %}
+                        <span class="badge bg-leaf text-white">Available</span>
+                      {% elif item.status == 'partially_allocated' %}
+                        <span class="badge bg-gold text-white">Partial</span>
+                      {% elif item.status == 'fully_allocated' %}
+                        <span class="badge bg-forest text-white">Rescued</span>
+                      {% elif item.status == 'expired' %}
+                        <span class="badge bg-secondary text-white">Expired</span>
+                      {% else %}
+                        <span class="badge bg-light text-dark">{{ item.status }}</span>
+                      {% endif %}
+                    </td>
+                    <td class="text-end">
+                      <a href="{{ url_for('listings.listing_detail', listing_id=item.listing_id) }}" class="btn btn-sm btn-outline-forest rounded-circle p-1" title="View details">
+                        <i data-lucide="eye" style="width: 15px; height: 15px;"></i>
+                      </a>
+                    </td>
+                  </tr>
+                {% else %}
+                  <tr>
+                    <td colspan="7" class="text-center py-4 text-muted small">No food listings posted yet.</td>
+                  </tr>
+                {% endfor %}
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+
+      <!-- Food Redistribution Overview Chart -->
+      <div class="card rounded-4 shadow-sm border-0 bg-surface">
+        <div class="card-header bg-transparent border-bottom py-3 d-flex justify-content-between align-items-center">
+          <div class="d-flex align-items-center gap-2">
+            <i data-lucide="bar-chart-2" class="text-forest"></i>
+            <h5 class="mb-0 fw-bold font-heading text-forest">Food Redistribution Overview</h5>
+          </div>
+          <span class="badge bg-sage-light text-forest small">Available vs Rescued</span>
+        </div>
+        <div class="card-body p-4">
+          <div style="height: 280px; position: relative;">
+            <canvas id="redistributionChart"></canvas>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Right Column: Expiring Soon & Upcoming Pickups -->
+    <div class="col-lg-4">
+      <!-- Expiring Soon Box -->
+      <div class="card rounded-4 shadow-sm border-0 bg-surface mb-4">
+        <div class="card-header bg-terracotta text-white py-3 rounded-top-4 d-flex justify-content-between align-items-center">
+          <div class="d-flex align-items-center gap-2">
+            <i data-lucide="alert-octagon" style="width: 18px; height: 18px;"></i>
+            <h6 class="mb-0 fw-bold">Expiring Soon Watch</h6>
+          </div>
+          <span class="badge bg-white text-terracotta rounded-pill px-2">{{ expiring_listings|length }}</span>
+        </div>
+        <div class="card-body p-3">
+          {% if expiring_listings %}
+            <div class="expiring-list">
+              {% for item in expiring_listings %}
+                <div class="expiring-item p-2 mb-2 rounded bg-cream border-start border-4 border-terracotta">
+                  <div class="d-flex justify-content-between align-items-start">
+                    <strong class="text-charcoal small text-truncate" style="max-width: 170px;">{{ item.food_name }}</strong>
+                    <span class="badge badge-urgent">{{ item.quantity }} {{ item.unit }}</span>
+                  </div>
+                  <div class="d-flex justify-content-between align-items-center mt-1">
+                    <small class="text-muted text-truncate" style="max-width: 130px;">{{ item.donor_name }}</small>
+                    <small class="text-terracotta fw-semibold" data-expiry-timestamp="{{ item.expiry_at }}">
+                      {{ item.expiry_at|time_ago }}
+                    </small>
+                  </div>
+                </div>
+              {% endfor %}
+            </div>
+            <a href="{{ url_for('matching.matching_page') }}" class="btn btn-sm btn-terracotta w-100 rounded-pill mt-2">
+              <i data-lucide="zap" class="me-1"></i> Match Urgent Food Now &rarr;
+            </a>
+          {% else %}
+            <div class="text-center py-4 text-muted small">
+              <i data-lucide="check-circle-2" class="text-leaf mb-2" style="width: 28px; height: 28px;"></i>
+              <p class="mb-0">All current food surplus has sufficient remaining shelf life.</p>
+            </div>
+          {% endif %}
+        </div>
+      </div>
+
+      <!-- Upcoming Pickups Timeline Card -->
+      <div class="card rounded-4 shadow-sm border-0 bg-surface">
+        <div class="card-header bg-forest text-white py-3 rounded-top-4 d-flex justify-content-between align-items-center">
+          <div class="d-flex align-items-center gap-2">
+            <i data-lucide="truck" style="width: 18px; height: 18px;"></i>
+            <h6 class="mb-0 fw-bold">Upcoming Pickup Route</h6>
+          </div>
+          <a href="{{ url_for('schedule.list_schedules') }}" class="text-white text-decoration-none small">
+            View All &rarr;
+          </a>
+        </div>
+        <div class="card-body p-3">
+          {% if upcoming_pickups %}
+            <div class="upcoming-stops-timeline position-relative ps-3 border-start border-2 border-forest ms-2 my-2">
+              {% for stop in upcoming_pickups %}
+                <div class="upcoming-stop-node position-relative mb-3 pb-1">
+                  <!-- Node Dot -->
+                  <div class="position-absolute rounded-circle bg-forest border border-2 border-white"
+                       style="width: 12px; height: 12px; left: -22px; top: 4px;"></div>
+                  <div class="d-flex justify-content-between align-items-start">
+                    <strong class="text-forest small">{{ stop.donor_name }}</strong>
+                    <span class="badge bg-sage text-forest font-monospace" style="font-size: 0.68rem;">
+                      {{ stop.scheduled_time or stop.schedule_date }}
+                    </span>
+                  </div>
+                  <div class="text-muted small text-truncate" style="font-size: 0.78rem;">
+                    <i data-lucide="map-pin" class="me-1" style="width: 12px; height: 12px;"></i>
+                    {{ stop.pickup_location }}
+                  </div>
+                  <div class="text-muted" style="font-size: 0.72rem;">
+                    Driver: <em>{{ stop.volunteer_name }}</em> ({{ stop.schedule_id }})
+                  </div>
+                </div>
+              {% endfor %}
+            </div>
+          {% else %}
+            <div class="text-center py-4 text-muted small">
+              <i data-lucide="calendar" class="text-muted mb-2" style="width: 28px; height: 28px;"></i>
+              <p class="mb-2">No pending pickup stops scheduled.</p>
+              <a href="{{ url_for('schedule.new_schedule') }}" class="btn btn-sm btn-outline-forest rounded-pill">
+                Create Schedule
+              </a>
+            </div>
+          {% endif %}
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+  document.addEventListener('DOMContentLoaded', () => {
+    // Render Redistribution Overview Chart (Chart.js)
+    const ctx = document.getElementById('redistributionChart');
+    if (!ctx) return;
+
+    const dataObj = {{ redistribution_data|tojson }};
+    if (!dataObj.categories || dataObj.categories.length === 0) return;
+
+    new Chart(ctx, {
+      type: 'bar',
+      data: {
+        labels: dataObj.categories,
+        datasets: [
+          {
+            label: 'Available Surplus Units',
+            data: dataObj.available,
+            backgroundColor: '#A8BFA0', // Sage Green
+            borderRadius: 4
+          },
+          {
+            label: 'Rescued / Allocated Units',
+            data: dataObj.rescued,
+            backgroundColor: '#285943', // Forest Green
+            borderRadius: 4
+          }
+        ]
+      },
+      options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        plugins: {
+          legend: {
+            position: 'top',
+            labels: {
+              boxWidth: 12,
+              font: { family: "'DM Sans', sans-serif", size: 12 }
+            }
+          }
+        },
+        scales: {
+          x: {
+            grid: { display: false }
+          },
+          y: {
+            beginAtZero: true,
+            title: { display: true, text: 'Quantity' }
+          }
+        }
+      }
+    });
+  });
+</script>
+{% endblock %}

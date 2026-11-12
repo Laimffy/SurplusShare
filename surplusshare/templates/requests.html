@@ -1,0 +1,181 @@
+{% extends "base.html" %}
+
+{% block title %}Recipient Requests — FIFO Queue — SurplusShare{% endblock %}
+{% block page_title %}Recipient Requests &amp; FIFO Queues{% endblock %}
+
+{% block content %}
+<div class="requests-page-container">
+  <!-- Educational FIFO Queue Banner -->
+  <div class="card rounded-3 shadow-sm border-0 mb-4 bg-forest text-white p-3 p-md-4">
+    <div class="row align-items-center">
+      <div class="col-md-8">
+        <span class="badge bg-leaf text-white mb-2 rounded-pill font-monospace text-uppercase" style="font-size: 0.75rem;">
+          DSA: First-In-First-Out (FIFO) Queue
+        </span>
+        <h4 class="fw-bold font-heading mb-1">Fair Community Reallocation</h4>
+        <p class="small text-cream-muted mb-0">
+          Requests are organized into category-based FIFO queues (<code>collections.deque</code>). Requests submitted earlier are strictly prioritized when matching donations, preventing starvation and guaranteeing equity.
+        </p>
+      </div>
+      <div class="col-md-4 text-md-end mt-3 mt-md-0">
+        <a href="{{ url_for('requests_bp.new_request') }}" class="btn btn-leaf rounded-pill px-4 shadow-sm text-nowrap">
+          <i data-lucide="plus-circle" class="me-1"></i> Submit New Request
+        </a>
+      </div>
+    </div>
+  </div>
+
+  <!-- Filter & Search Toolbar -->
+  <div class="card rounded-3 shadow-sm border-0 mb-4 bg-surface">
+    <div class="card-body p-3">
+      <form method="GET" action="{{ url_for('requests_bp.list_requests') }}" class="d-flex flex-wrap gap-2 align-items-center">
+        <div class="filter-group">
+          <select name="category" class="form-select form-select-sm" onchange="this.form.submit()">
+            <option value="">All Categories</option>
+            {% for cat in categories %}
+              <option value="{{ cat }}" {% if category_filter == cat %}selected{% endif %}>{{ cat }}</option>
+            {% endfor %}
+          </select>
+        </div>
+
+        <div class="filter-group">
+          <select name="status" class="form-select form-select-sm" onchange="this.form.submit()">
+            <option value="">All Statuses</option>
+            <option value="pending" {% if status_filter == 'pending' %}selected{% endif %}>Pending (In Queue)</option>
+            <option value="partially_fulfilled" {% if status_filter == 'partially_fulfilled' %}selected{% endif %}>Partially Fulfilled</option>
+            <option value="fulfilled" {% if status_filter == 'fulfilled' %}selected{% endif %}>Fulfilled</option>
+            <option value="cancelled" {% if status_filter == 'cancelled' %}selected{% endif %}>Cancelled</option>
+          </select>
+        </div>
+
+        {% if category_filter or status_filter %}
+          <a href="{{ url_for('requests_bp.list_requests') }}" class="btn btn-sm btn-link text-muted">Clear Filters</a>
+        {% endif %}
+
+        <div class="ms-auto">
+          <input type="text" id="clientSearchInput" class="form-control form-control-sm" placeholder="Filter requests..." style="max-width: 200px;">
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- Requests Table / Queue Display -->
+  {% if requests %}
+    <div class="card rounded-3 shadow-sm border-0 bg-surface">
+      <div class="card-body p-0">
+        <div class="table-responsive">
+          <table class="table table-hover align-middle mb-0 custom-table">
+            <thead class="table-light text-muted small text-uppercase">
+              <tr>
+                <th style="width: 70px;">Queue #</th>
+                <th>Request ID</th>
+                <th>Organization</th>
+                <th>Food Category</th>
+                <th>Requested Qty</th>
+                <th>Fulfilled Qty</th>
+                <th>Min Shelf Life</th>
+                <th>Submitted</th>
+                <th>Status</th>
+                <th class="text-end">Actions</th>
+              </tr>
+            </thead>
+            <tbody>
+              {% for req in requests %}
+                <tr class="searchable-item">
+                  <td>
+                    {% if req.status == 'pending' or req.status == 'partially_fulfilled' %}
+                      <span class="badge bg-forest text-white rounded-circle p-2" style="width: 28px; height: 28px; display: inline-flex; align-items: center; justify-content: center;">
+                        {{ loop.index }}
+                      </span>
+                    {% else %}
+                      <span class="text-muted small">&mdash;</span>
+                    {% endif %}
+                  </td>
+                  <td>
+                    <span class="font-monospace fw-semibold text-charcoal">{{ req.request_id }}</span>
+                  </td>
+                  <td>
+                    <strong class="text-forest">{{ req.organization_name }}</strong>
+                  </td>
+                  <td>
+                    <span class="badge bg-sage-light text-forest">{{ req.food_category }}</span>
+                  </td>
+                  <td>
+                    <span class="fw-bold">{{ req.requested_quantity }}</span> <small class="text-muted">{{ req.quantity_unit }}</small>
+                  </td>
+                  <td>
+                    {% if req.fulfilled_quantity > 0 %}
+                      <span class="text-leaf fw-bold">{{ req.fulfilled_quantity }}</span> <small class="text-muted">{{ req.quantity_unit }}</small>
+                    {% else %}
+                      <span class="text-muted">0 {{ req.quantity_unit }}</span>
+                    {% endif %}
+                  </td>
+                  <td>
+                    {% if req.min_shelf_life_hours > 0 %}
+                      <span class="badge bg-light text-dark">&ge; {{ req.min_shelf_life_hours }} hrs</span>
+                    {% else %}
+                      <span class="text-muted small">Any</span>
+                    {% endif %}
+                  </td>
+                  <td>
+                    <small class="text-muted" title="{{ req.requested_at|format_datetime }}">{{ req.requested_at|time_ago }}</small>
+                  </td>
+                  <td>
+                    {% if req.status == 'pending' %}
+                      <span class="badge bg-warning text-dark">Pending</span>
+                    {% elif req.status == 'partially_fulfilled' %}
+                      <span class="badge bg-gold text-white">Partial</span>
+                    {% elif req.status == 'fulfilled' %}
+                      <span class="badge bg-forest text-white">Fulfilled</span>
+                    {% elif req.status == 'cancelled' %}
+                      <span class="badge bg-secondary text-white">Cancelled</span>
+                    {% else %}
+                      <span class="badge bg-light text-dark">{{ req.status }}</span>
+                    {% endif %}
+                  </td>
+                  <td class="text-end">
+                    {% set is_owner = (current_user.role == 'admin') or (current_user.role == 'recipient' and (req.recipient_id == current_user.id or req.organization_name == current_user.organization or req.organization_name == current_user.display_name)) %}
+                    {% if is_owner %}
+                      <div class="d-flex justify-content-end gap-1">
+                        {% if req.fulfilled_quantity > 0 %}
+                          <form method="POST" action="{{ url_for('requests_bp.confirm_receipt', request_id=req.request_id) }}" data-confirm="Confirm receipt of delivery for '{{ req.organization_name }}'?" class="d-inline">
+                            <button type="submit" class="btn btn-sm btn-outline-success rounded-pill px-2 py-1" title="Confirm Receipt">
+                              <i data-lucide="check-circle" class="me-1" style="width: 14px; height: 14px;"></i> Received
+                            </button>
+                          </form>
+                        {% endif %}
+                        {% if req.status in ('pending', 'partially_fulfilled') %}
+                          <form method="POST" action="{{ url_for('requests_bp.cancel_request_route', request_id=req.request_id) }}" data-confirm="Cancel request '{{ req.request_id }}'?" class="d-inline">
+                            <button type="submit" class="btn btn-sm btn-outline-danger rounded-pill px-2 py-1" title="Cancel Request">
+                              Cancel
+                            </button>
+                          </form>
+                        {% endif %}
+                      </div>
+                    {% else %}
+                      <span class="text-muted small">&mdash;</span>
+                    {% endif %}
+                  </td>
+                </tr>
+              {% endfor %}
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  {% else %}
+    <div class="card rounded-3 shadow-sm border-0 bg-surface p-5 text-center">
+      <div class="empty-state-icon mb-3">
+        <i data-lucide="inbox" class="text-sage" style="width: 64px; height: 64px;"></i>
+      </div>
+      <h4 class="text-forest font-heading">No Recipient Requests Found</h4>
+      <p class="text-muted mb-4">No community organizations have submitted requests matching the current filters.</p>
+      <div>
+        <a href="{{ url_for('requests_bp.new_request') }}" class="btn btn-leaf rounded-pill px-4">
+          <i data-lucide="plus-circle" class="me-1"></i> Submit First Request
+        </a>
+      </div>
+    </div>
+  {% endif %}
+</div>
+{% endblock %}

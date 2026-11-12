@@ -1,0 +1,79 @@
+{% extends "base.html" %}
+
+{% block title %}Contact Inquiries — SurplusShare Admin{% endblock %}
+{% block page_title %}Contact Inquiries &amp; Messages{% endblock %}
+
+{% block content %}
+<div class="admin-inquiries-container">
+  <div class="card rounded-3 shadow-sm border-0 mb-4 bg-surface">
+    <div class="card-body p-3">
+      <h5 class="fw-bold font-heading text-forest mb-0">Public Contact Inquiries</h5>
+      <small class="text-muted">Messages, partner applications, and community assistance requests submitted through the public website.</small>
+    </div>
+  </div>
+
+  <div class="card rounded-3 shadow-sm border-0 bg-surface">
+    <div class="card-body p-0">
+      {% if inquiries %}
+        <div class="table-responsive">
+          <table class="table table-hover align-middle mb-0 custom-table">
+            <thead class="table-light small text-muted text-uppercase">
+              <tr>
+                <th>Status</th>
+                <th>Sender</th>
+                <th>Subject</th>
+                <th>Organization</th>
+                <th>Message Content</th>
+                <th>Received</th>
+                <th class="text-end">Update Status</th>
+              </tr>
+            </thead>
+            <tbody>
+              {% for inq in inquiries %}
+                <tr>
+                  <td>
+                    {% if inq.status == 'new' %}
+                      <span class="badge bg-terracotta text-white">New</span>
+                    {% elif inq.status == 'read' %}
+                      <span class="badge bg-sage text-forest">Read</span>
+                    {% elif inq.status == 'responded' %}
+                      <span class="badge bg-leaf text-white">Responded</span>
+                    {% else %}
+                      <span class="badge bg-secondary text-white">Archived</span>
+                    {% endif %}
+                  </td>
+                  <td>
+                    <strong class="text-forest">{{ inq.name }}</strong>
+                    <div class="small text-muted">{{ inq.email }}</div>
+                  </td>
+                  <td class="fw-semibold text-charcoal small">{{ inq.subject }}</td>
+                  <td class="small text-muted">{{ inq.organization or '—' }}</td>
+                  <td>
+                    <p class="small text-charcoal mb-0" style="max-width: 300px;">{{ inq.message }}</p>
+                  </td>
+                  <td class="small text-muted">{{ inq.created_at|time_ago }}</td>
+                  <td class="text-end">
+                    <form method="POST" action="{{ url_for('admin.update_inquiry_status', inquiry_id=inq.id) }}" class="d-inline">
+                      <select name="status" class="form-select form-select-sm py-0 px-2 d-inline-block w-auto" onchange="this.form.submit()" style="font-size: 0.75rem;">
+                        <option value="new" {% if inq.status == 'new' %}selected{% endif %}>New</option>
+                        <option value="read" {% if inq.status == 'read' %}selected{% endif %}>Read</option>
+                        <option value="responded" {% if inq.status == 'responded' %}selected{% endif %}>Responded</option>
+                        <option value="archived" {% if inq.status == 'archived' %}selected{% endif %}>Archived</option>
+                      </select>
+                    </form>
+                  </td>
+                </tr>
+              {% endfor %}
+            </tbody>
+          </table>
+        </div>
+      {% else %}
+        <div class="p-5 text-center text-muted">
+          <i data-lucide="mail-open" class="text-sage mb-2" style="width: 48px; height: 48px;"></i>
+          <p class="mb-0">No contact messages currently in inbox.</p>
+        </div>
+      {% endif %}
+    </div>
+  </div>
+</div>
+{% endblock %}

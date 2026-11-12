@@ -1,0 +1,257 @@
+{% extends "base.html" %}
+
+{% block title %}Schedule {{ schedule.schedule_id }} — Doubly Linked List — SurplusShare{% endblock %}
+{% block page_title %}Pickup Schedule Route{% endblock %}
+
+{% block content %}
+<div class="schedule-detail-container">
+  <!-- Breadcrumb -->
+  <nav aria-label="breadcrumb" class="mb-4">
+    <ol class="breadcrumb">
+      <li class="breadcrumb-item"><a href="{{ url_for('schedule.list_schedules') }}" class="text-forest text-decoration-none">Schedules</a></li>
+      <li class="breadcrumb-item active" aria-current="page">{{ schedule.schedule_id }}</li>
+    </ol>
+  </nav>
+
+  <!-- Schedule Header Info Card -->
+  <div class="card rounded-3 shadow-sm border-0 mb-4 bg-surface">
+    <div class="card-body p-4">
+      <div class="d-flex flex-column flex-md-row justify-content-between align-items-md-center gap-3">
+        <div>
+          <div class="d-flex align-items-center gap-2 mb-1">
+            <span class="badge bg-forest text-white font-monospace">{{ schedule.schedule_id }}</span>
+            <span class="badge bg-sage-light text-forest text-capitalize">{{ schedule.status }}</span>
+          </div>
+          <h2 class="h3 fw-bold font-heading text-forest mb-1">Volunteer: {{ schedule.volunteer_name }}</h2>
+          <span class="text-muted small">
+            <i data-lucide="calendar" class="me-1" style="width: 14px; height: 14px;"></i>
+            Date: <strong>{{ schedule.schedule_date }}</strong> &bull; Total Stops: <strong>{{ dll_size }} nodes</strong>
+          </span>
+        </div>
+        {% if current_user.role == 'admin' %}
+          <div class="d-flex gap-2">
+            <button type="button" class="btn btn-leaf rounded-pill px-3 shadow-sm" data-bs-toggle="modal" data-bs-target="#addStopModal">
+              <i data-lucide="plus-circle" class="me-1"></i> Add Stop Node
+            </button>
+          </div>
+        {% endif %}
+      </div>
+    </div>
+  </div>
+
+  <!-- DSA Traversal Tabs -->
+  <ul class="nav nav-pills mb-4" id="dllTab" role="tablist">
+    <li class="nav-item" role="presentation">
+      <button class="nav-link active rounded-pill px-4" id="forward-tab" data-bs-toggle="pill" data-bs-target="#forward-view" type="button" role="tab">
+        <i data-lucide="arrow-down" class="me-1"></i> Forward Route (Head &rarr; Tail)
+      </button>
+    </li>
+    <li class="nav-item ms-2" role="presentation">
+      <button class="nav-link rounded-pill px-4" id="backward-tab" data-bs-toggle="pill" data-bs-target="#backward-view" type="button" role="tab">
+        <i data-lucide="arrow-up" class="me-1"></i> Backward Traversal (Tail &rarr; Head)
+      </button>
+    </li>
+  </ul>
+
+  <div class="tab-content" id="dllTabContent">
+    <!-- Tab 1: Forward Route Timeline -->
+    <div class="tab-pane fade show active" id="forward-view" role="tabpanel">
+      {% if stops %}
+        <div class="timeline-container ps-3 border-start border-3 border-forest position-relative ms-3">
+          {% for stop in stops %}
+            <div class="card rounded-3 shadow-sm border-0 bg-surface mb-3 position-relative">
+              <!-- Timeline node circle -->
+              <div class="timeline-node-badge position-absolute rounded-circle bg-forest text-white fw-bold d-flex align-items-center justify-content-center"
+                   style="left: -32px; top: 18px; width: 28px; height: 28px; font-size: 0.8rem; z-index: 2;">
+                {{ stop.stop_order }}
+              </div>
+
+              <div class="card-body p-3 p-md-4">
+                <div class="d-flex flex-column flex-md-row justify-content-between align-items-md-center gap-2 mb-2 pb-2 border-bottom">
+                  <div>
+                    <span class="badge bg-sage text-forest me-2 font-monospace">{{ stop.stop_id }}</span>
+                    <strong class="h5 mb-0 text-forest font-heading">{{ stop.donor_name }}</strong>
+                  </div>
+                  {% if user_can_manage %}
+                    <!-- Status dropdown -->
+                    <form method="POST" action="{{ url_for('schedule.update_stop_status_route', stop_id=stop.stop_id) }}" class="d-flex align-items-center gap-2">
+                      <input type="hidden" name="schedule_id" value="{{ schedule.schedule_id }}">
+                      <select name="status" class="form-select form-select-sm" onchange="this.form.submit()" style="width: 130px;">
+                        {% for st in stop_statuses %}
+                          <option value="{{ st }}" {% if stop.status == st %}selected{% endif %}>{{ st|capitalize }}</option>
+                        {% endfor %}
+                      </select>
+                    </form>
+                  {% else %}
+                    <span class="badge bg-sage-light text-forest text-capitalize px-3 py-1 font-monospace">{{ stop.status }}</span>
+                  {% endif %}
+                </div>
+
+                <div class="row g-2 mb-3 small">
+                  <div class="col-md-6 text-muted">
+                    <i data-lucide="map-pin" class="text-terracotta me-1" style="width: 14px; height: 14px;"></i>
+                    Location: <span class="text-charcoal">{{ stop.pickup_location }}</span>
+                  </div>
+                  <div class="col-md-6 text-muted">
+                    <i data-lucide="clock" class="text-forest me-1" style="width: 14px; height: 14px;"></i>
+                    Scheduled: <span class="text-charcoal">{{ stop.scheduled_time or 'Flexible' }}</span>
+                  </div>
+                  {% if stop.notes %}
+                    <div class="col-12 text-muted">
+                      <i data-lucide="file-text" class="me-1" style="width: 14px; height: 14px;"></i>
+                      Notes: <em>{{ stop.notes }}</em>
+                    </div>
+                  {% endif %}
+                </div>
+
+                <!-- Doubly Linked List Pointers & Reorder Controls -->
+                <div class="p-2 rounded bg-cream d-flex flex-wrap justify-content-between align-items-center gap-2">
+                  <div class="d-flex gap-3 small font-monospace">
+                    <div>
+                      <span class="text-muted">prev:</span>
+                      <strong class="{% if stop.has_prev %}text-forest{% else %}text-muted{% endif %}">
+                        {{ stop.prev_stop_id or 'NULL (HEAD)' }}
+                      </strong>
+                    </div>
+                    <div>
+                      <span class="text-muted">next:</span>
+                      <strong class="{% if stop.has_next %}text-forest{% else %}text-muted{% endif %}">
+                        {{ stop.next_stop_id or 'NULL (TAIL)' }}
+                      </strong>
+                    </div>
+                  </div>
+
+                  {% if user_can_manage %}
+                    <!-- DLL Swap Pointer Operations -->
+                    <div class="d-flex gap-1 align-items-center">
+                      {% if stop.has_prev %}
+                        <form method="POST" action="{{ url_for('schedule.move_stop_route', schedule_id=schedule.schedule_id, stop_id=stop.stop_id) }}">
+                          <input type="hidden" name="direction" value="up">
+                          <button type="submit" class="btn btn-sm btn-outline-forest py-0 px-2" title="Move Up (Swap with Prev Node)">
+                            <i data-lucide="arrow-up" style="width: 12px; height: 12px;"></i> Up
+                          </button>
+                        </form>
+                      {% endif %}
+
+                      {% if stop.has_next %}
+                        <form method="POST" action="{{ url_for('schedule.move_stop_route', schedule_id=schedule.schedule_id, stop_id=stop.stop_id) }}">
+                          <input type="hidden" name="direction" value="down">
+                          <button type="submit" class="btn btn-sm btn-outline-forest py-0 px-2" title="Move Down (Swap with Next Node)">
+                            <i data-lucide="arrow-down" style="width: 12px; height: 12px;"></i> Down
+                          </button>
+                        </form>
+                      {% endif %}
+
+                      {% if current_user.role == 'admin' %}
+                        <form method="POST" action="{{ url_for('schedule.remove_stop_route', stop_id=stop.stop_id) }}" data-confirm="Remove stop '{{ stop.stop_id }}' from schedule?">
+                          <input type="hidden" name="schedule_id" value="{{ schedule.schedule_id }}">
+                          <button type="submit" class="btn btn-sm btn-outline-danger py-0 px-2 ms-1" title="Unlink &amp; Remove Node">
+                            <i data-lucide="trash-2" style="width: 12px; height: 12px;"></i>
+                          </button>
+                        </form>
+                      {% endif %}
+                    </div>
+                  {% endif %}
+                </div>
+              </div>
+            </div>
+          {% endfor %}
+        </div>
+      {% else %}
+        <div class="card rounded-3 shadow-sm border-0 bg-surface p-5 text-center">
+          <i data-lucide="map-pin-off" class="text-sage mb-3" style="width: 48px; height: 48px;"></i>
+          <h5 class="text-forest font-heading">Empty Schedule List</h5>
+          <p class="text-muted small mb-3">No pickup stops have been appended to this schedule yet.</p>
+          <button type="button" class="btn btn-leaf rounded-pill px-4" data-bs-toggle="modal" data-bs-target="#addStopModal">
+            Append First Stop
+          </button>
+        </div>
+      {% endif %}
+    </div>
+
+    <!-- Tab 2: Backward Traversal (Tail to Head) -->
+    <div class="tab-pane fade" id="backward-view" role="tabpanel">
+      <div class="card rounded-3 shadow-sm border-0 bg-surface p-4">
+        <div class="d-flex align-items-center mb-3">
+          <i data-lucide="rotate-ccw" class="text-forest me-2"></i>
+          <h5 class="mb-0 fw-bold font-heading text-forest">Backward Traversal Inspection (Tail &rarr; Head)</h5>
+        </div>
+        <p class="small text-muted mb-4">
+          Demonstrates the bidirectional capability of the Doubly Linked List. In this traversal, the volunteer driver or route inspector traverses from the terminal node back to the initial node using <code>node.prev</code> references.
+        </p>
+
+        {% if backward_stops %}
+          <div class="table-responsive">
+            <table class="table table-hover align-middle custom-table">
+              <thead class="table-light small text-muted text-uppercase">
+                <tr>
+                  <th>Order In Backward Run</th>
+                  <th>Stop ID</th>
+                  <th>Donor Organization</th>
+                  <th>Pickup Location</th>
+                  <th>Status</th>
+                  <th>Next (Forward Direction)</th>
+                  <th>Prev (Return Direction)</th>
+                </tr>
+              </thead>
+              <tbody>
+                {% for bstop in backward_stops %}
+                  <tr>
+                    <td><span class="badge bg-gold text-white rounded-circle p-2">{{ loop.index }}</span></td>
+                    <td class="font-monospace fw-semibold">{{ bstop.stop_id }}</td>
+                    <td class="fw-semibold text-forest">{{ bstop.donor_name }}</td>
+                    <td class="small text-muted">{{ bstop.pickup_location }}</td>
+                    <td><span class="badge bg-sage text-forest text-capitalize">{{ bstop.status }}</span></td>
+                    <td class="font-monospace small text-muted">{{ bstop.next_stop_id or 'NULL (TAIL)' }}</td>
+                    <td class="font-monospace small text-forest fw-bold">{{ bstop.prev_stop_id or 'NULL (HEAD)' }}</td>
+                  </tr>
+                {% endfor %}
+              </tbody>
+            </table>
+          </div>
+        {% else %}
+          <p class="text-muted small">No stops present in schedule.</p>
+        {% endif %}
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Modal: Add Stop Node -->
+<div class="modal fade" id="addStopModal" tabindex="-1" aria-labelledby="addStopModalLabel" aria-hidden="true">
+  <div class="modal-dialog">
+    <div class="modal-content rounded-3 border-0">
+      <div class="modal-header bg-forest text-white">
+        <h5 class="modal-title font-heading" id="addStopModalLabel">
+          <i data-lucide="plus-circle" class="me-1"></i> Add Pickup Stop Node
+        </h5>
+        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <form method="POST" action="{{ url_for('schedule.add_stop_route', schedule_id=schedule.schedule_id) }}">
+        <div class="modal-body p-4">
+          <div class="mb-3">
+            <label for="donor_name" class="form-label fw-semibold">Donor Organization <span class="text-danger">*</span></label>
+            <input type="text" class="form-control" id="donor_name" name="donor_name" placeholder="e.g. Sunrise Bakery" required>
+          </div>
+          <div class="mb-3">
+            <label for="pickup_location" class="form-label fw-semibold">Pickup Address <span class="text-danger">*</span></label>
+            <input type="text" class="form-control" id="pickup_location" name="pickup_location" placeholder="e.g. 78 Maginhawa Street, Quezon City" required>
+          </div>
+          <div class="mb-3">
+            <label for="scheduled_time" class="form-label fw-semibold">Scheduled Pickup Time <span class="text-danger">*</span></label>
+            <input type="time" class="form-control" id="scheduled_time" name="scheduled_time" required>
+          </div>
+          <div class="mb-3">
+            <label for="notes" class="form-label fw-semibold">Volunteer Notes</label>
+            <textarea class="form-control" id="notes" name="notes" rows="2" placeholder="e.g. Call manager upon arrival, bring insulated crates"></textarea>
+          </div>
+        </div>
+        <div class="modal-footer bg-light">
+          <button type="button" class="btn btn-outline-secondary rounded-pill" data-bs-dismiss="modal">Cancel</button>
+          <button type="submit" class="btn btn-leaf rounded-pill px-4">Append Stop to Chain</button>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
+{% endblock %}

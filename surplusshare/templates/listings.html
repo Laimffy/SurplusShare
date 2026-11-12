@@ -1,0 +1,154 @@
+{% extends "base.html" %}
+
+{% block title %}Food Listings — SurplusShare{% endblock %}
+{% block page_title %}Food Surplus Listings{% endblock %}
+
+{% block content %}
+<div class="listings-page-container">
+  <!-- Actions & Filter Bar -->
+  <div class="card rounded-3 shadow-sm border-0 mb-4 bg-surface">
+    <div class="card-body p-3">
+      <div class="d-flex flex-column flex-md-row justify-content-between align-items-md-center gap-3">
+        <!-- Filter Form -->
+        <form method="GET" action="{{ url_for('listings.list_listings') }}" class="d-flex flex-wrap gap-2 flex-grow-1 align-items-center">
+          <div class="filter-group">
+            <select name="category" class="form-select form-select-sm" onchange="this.form.submit()">
+              <option value="">All Categories</option>
+              {% for cat in categories %}
+                <option value="{{ cat }}" {% if category_filter == cat %}selected{% endif %}>{{ cat }}</option>
+              {% endfor %}
+            </select>
+          </div>
+
+          <div class="filter-group">
+            <select name="status" class="form-select form-select-sm" onchange="this.form.submit()">
+              <option value="">All Statuses</option>
+              <option value="available" {% if status_filter == 'available' %}selected{% endif %}>Available</option>
+              <option value="partially_allocated" {% if status_filter == 'partially_allocated' %}selected{% endif %}>Partially Allocated</option>
+              <option value="fully_allocated" {% if status_filter == 'fully_allocated' %}selected{% endif %}>Fully Allocated</option>
+              <option value="expired" {% if status_filter == 'expired' %}selected{% endif %}>Expired</option>
+            </select>
+          </div>
+
+          {% if category_filter or status_filter %}
+            <a href="{{ url_for('listings.list_listings') }}" class="btn btn-sm btn-link text-muted">Clear Filters</a>
+          {% endif %}
+        </form>
+
+        <!-- Right Side: Search & Create -->
+        <div class="d-flex gap-2 align-items-center">
+          <input type="text" id="clientSearchInput" class="form-control form-control-sm" placeholder="Quick filter on page..." style="max-width: 200px;">
+          {% if current_user.role in ('donor', 'admin') %}
+            <a href="{{ url_for('listings.new_listing') }}" class="btn btn-sm btn-leaf rounded-pill text-nowrap">
+              <i data-lucide="plus" class="me-1"></i> Add Food Listing
+            </a>
+          {% endif %}
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Listings Grid -->
+  {% if listings %}
+    <div class="row g-3">
+      {% for item in listings %}
+        <div class="col-md-6 col-lg-4 searchable-item">
+          <div class="card listing-card h-100 rounded-3 shadow-sm border-0 bg-surface position-relative overflow-hidden">
+            <!-- Top Color Border based on Expiry Status -->
+            <div class="expiry-color-stripe stripe-{{ item.expiry_at|expiry_status }}"></div>
+
+            <div class="card-body p-3 d-flex flex-column">
+              <div class="d-flex justify-content-between align-items-start mb-2">
+                <div>
+                  <span class="badge bg-sage-light text-forest me-1">{{ item.category }}</span>
+                  <small class="text-muted font-monospace">{{ item.listing_id }}</small>
+                </div>
+                {% if item.status == 'available' %}
+                  <span class="badge bg-leaf text-white">Available</span>
+                {% elif item.status == 'partially_allocated' %}
+                  <span class="badge bg-gold text-white">Partial</span>
+                {% elif item.status == 'fully_allocated' %}
+                  <span class="badge bg-forest text-white">Rescued</span>
+                {% elif item.status == 'expired' %}
+                  <span class="badge bg-secondary text-white">Expired</span>
+                {% else %}
+                  <span class="badge bg-light text-dark">{{ item.status }}</span>
+                {% endif %}
+              </div>
+
+              <h5 class="card-title text-forest fw-bold mb-1 font-heading">{{ item.food_name }}</h5>
+              <div class="text-muted small mb-2 d-flex align-items-center">
+                <i data-lucide="store" class="me-1" style="width: 14px; height: 14px;"></i>
+                <span class="text-truncate">{{ item.donor_name }}</span>
+              </div>
+
+              <div class="listing-metric-box p-2 rounded bg-cream mb-3">
+                <div class="d-flex justify-content-between">
+                  <span class="small text-muted">Surplus Quantity:</span>
+                  <span class="fw-bold text-charcoal">{{ item.quantity }} {{ item.unit }}</span>
+                </div>
+                {% if item.allocated_quantity > 0 %}
+                  <div class="d-flex justify-content-between mt-1 pt-1 border-top border-light">
+                    <span class="small text-muted">Allocated:</span>
+                    <span class="small text-forest fw-semibold">{{ item.allocated_quantity }} {{ item.unit }}</span>
+                  </div>
+                {% endif %}
+              </div>
+
+              <div class="expiry-info small mb-3">
+                <div class="d-flex justify-content-between align-items-center">
+                  <span class="text-muted"><i data-lucide="clock" class="me-1" style="width: 14px; height: 14px;"></i> Expiry:</span>
+                  <span data-expiry-timestamp="{{ item.expiry_at }}" class="badge badge-{{ item.expiry_at|expiry_status }}">
+                    {{ item.expiry_at|time_ago }}
+                  </span>
+                </div>
+                <div class="text-muted text-end mt-1" style="font-size: 0.75rem;">
+                  {{ item.expiry_at|format_datetime }}
+                </div>
+              </div>
+
+              <div class="pickup-location text-muted small mb-3 text-truncate">
+                <i data-lucide="map-pin" class="me-1" style="width: 14px; height: 14px;"></i>
+                {{ item.pickup_location }}
+              </div>
+
+              <!-- Action Buttons -->
+              <div class="mt-auto pt-2 border-top d-flex justify-content-between align-items-center">
+                <a href="{{ url_for('listings.listing_detail', listing_id=item.listing_id) }}" class="btn btn-sm btn-outline-forest rounded-pill px-3">
+                  View Details
+                </a>
+                {% set can_edit_item = (current_user.role == 'admin') or (current_user.role == 'donor' and (item.donor_id == current_user.id or item.donor_name == current_user.organization or item.donor_name == current_user.display_name or item.donor_name == current_user.username)) %}
+                {% if can_edit_item %}
+                  <div class="btn-group">
+                    <a href="{{ url_for('listings.edit_listing', listing_id=item.listing_id) }}" class="btn btn-sm btn-outline-secondary" title="Edit">
+                      <i data-lucide="pencil" style="width: 14px; height: 14px;"></i>
+                    </a>
+                    <form method="POST" action="{{ url_for('listings.delete_listing_route', listing_id=item.listing_id) }}" data-confirm="Are you sure you want to delete listing '{{ item.listing_id }}'?" class="d-inline">
+                      <button type="submit" class="btn btn-sm btn-outline-danger" title="Delete">
+                        <i data-lucide="trash-2" style="width: 14px; height: 14px;"></i>
+                      </button>
+                    </form>
+                  </div>
+                {% endif %}
+              </div>
+            </div>
+          </div>
+        </div>
+      {% endfor %}
+    </div>
+  {% else %}
+    <div class="card rounded-3 shadow-sm border-0 bg-surface p-5 text-center">
+      <div class="empty-state-icon mb-3">
+        <i data-lucide="package-open" class="text-sage" style="width: 64px; height: 64px;"></i>
+      </div>
+      <h4 class="text-forest font-heading">No Food Listings Found</h4>
+      <p class="text-muted mb-4">No surplus food items match your filter criteria or none have been submitted yet.</p>
+      <div>
+        <a href="{{ url_for('listings.new_listing') }}" class="btn btn-leaf rounded-pill px-4">
+          <i data-lucide="plus-circle" class="me-1"></i> Add First Food Listing
+        </a>
+      </div>
+    </div>
+  {% endif %}
+</div>
+{% endblock %}

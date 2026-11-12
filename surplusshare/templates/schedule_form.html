@@ -1,0 +1,49 @@
+{% extends "base.html" %}
+
+{% block title %}Create Pickup Schedule — SurplusShare{% endblock %}
+{% block page_title %}Plan Volunteer Pickup Route{% endblock %}
+
+{% block content %}
+<div class="form-container" style="max-width: 600px; margin: 0 auto;">
+  <!-- Breadcrumb -->
+  <nav aria-label="breadcrumb" class="mb-4">
+    <ol class="breadcrumb">
+      <li class="breadcrumb-item"><a href="{{ url_for('schedule.list_schedules') }}" class="text-forest text-decoration-none">Schedules</a></li>
+      <li class="breadcrumb-item active" aria-current="page">New Schedule</li>
+    </ol>
+  </nav>
+
+  <div class="card rounded-3 shadow-sm border-0 bg-surface">
+    <div class="card-header bg-forest text-white p-3 p-md-4 rounded-top-3">
+      <div class="d-flex align-items-center">
+        <i data-lucide="truck" class="me-2" style="width: 24px; height: 24px;"></i>
+        <h4 class="mb-0 fw-bold font-heading">New Volunteer Schedule</h4>
+      </div>
+      <p class="mb-0 small text-sage-light mt-1">
+        Initialize a new Doubly Linked List to sequence volunteer pickup stops.
+      </p>
+    </div>
+
+    <div class="card-body p-4">
+      <form method="POST" action="{{ url_for('schedule.create_schedule_route') }}">
+        <div class="mb-3">
+          <label for="volunteer_name" class="form-label fw-semibold text-charcoal">Volunteer Driver Name <span class="text-danger">*</span></label>
+          <input type="text" class="form-control" id="volunteer_name" name="volunteer_name" value="{{ sched.volunteer_name if sched else '' }}" placeholder="e.g. Juan Volunteer, Maria Volunteer" required>
+        </div>
+
+        <div class="mb-4">
+          <label for="schedule_date" class="form-label fw-semibold text-charcoal">Schedule Date <span class="text-danger">*</span></label>
+          <input type="date" class="form-control" id="schedule_date" name="schedule_date" value="{{ sched.schedule_date if sched else '' }}" required>
+        </div>
+
+        <div class="d-flex justify-content-end gap-2 pt-3 border-top">
+          <a href="{{ url_for('schedule.list_schedules') }}" class="btn btn-outline-secondary rounded-pill px-4">Cancel</a>
+          <button type="submit" class="btn btn-leaf rounded-pill px-4 shadow-sm">
+            <i data-lucide="check" class="me-1"></i> Create Schedule
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
+{% endblock %}

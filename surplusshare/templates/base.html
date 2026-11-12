@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>{% block title %}SurplusShare — Food Waste Reallocation System{% endblock %}</title>
+
+  <!-- Google Fonts: DM Sans & Lora -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,400;0,9..40,500;0,9..40,600;0,9..40,700;1,9..40,400&family=Lora:ital,wght@0,400;0,600;0,700;1,400&display=swap" rel="stylesheet">
+
+  <!-- Bootstrap 5 CSS -->
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+
+  <!-- Custom Design System CSS -->
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+
+  <!-- Lucide Icons -->
+  <script src="https://unpkg.com/lucide@latest"></script>
+
+  <!-- Chart.js -->
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.2/dist/chart.umd.min.js"></script>
+</head>
+<body class="app-body">
+  <div class="app-layout">
+    <!-- Sidebar Backdrop for mobile drawer -->
+    <div id="sidebarBackdrop" class="sidebar-backdrop"></div>
+
+    <!-- Sidebar Navigation -->
+    {% include '_sidebar.html' %}
+
+    <!-- Main Application Shell -->
+    <div class="app-main">
+      <!-- Top Header Bar -->
+      {% include '_header.html' %}
+
+      <!-- Primary Content Area -->
+      <main class="app-content">
+        <!-- Flash Messages Area -->
+        {% with messages = get_flashed_messages(with_categories=true) %}
+          {% if messages %}
+            <div class="flash-messages-area mb-4">
+              {% for category, message in messages %}
+                <div class="alert alert-{{ 'danger' if category == 'error' else ('warning' if category == 'warning' else ('success' if category == 'success' else 'info')) }} alert-dismissible fade show custom-alert shadow-sm border-0" role="alert">
+                  <div class="d-flex align-items-center">
+                    <i data-lucide="{{ 'alert-circle' if category == 'error' else ('alert-triangle' if category == 'warning' else ('check-circle-2' if category == 'success' else 'info')) }}" class="me-2 flex-shrink-0" style="width: 20px; height: 20px;"></i>
+                    <span class="fw-medium">{{ message }}</span>
+                  </div>
+                  <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                </div>
+              {% endfor %}
+            </div>
+          {% endif %}
+        {% endwith %}
+
+        <!-- View-Specific Body Content -->
+        {% block content %}{% endblock %}
+      </main>
+
+      <!-- Toast Notification Container -->
+      <div id="toastContainer" class="toast-container position-fixed bottom-0 end-0 p-3" style="z-index: 1090;"></div>
+
+      <!-- App Footer -->
+      <footer class="app-footer">
+        <div class="container-fluid d-flex flex-column flex-md-row justify-content-between align-items-center gap-2">
+          <span class="text-muted small">
+            <strong>SurplusShare</strong> &bull; "Share More. Waste Less. Nourish Communities." &bull; DSA Final Project &copy; {{ current_year }}
+          </span>
+          <div class="d-flex gap-2">
+            <span class="badge bg-forest text-white">UN SDG 2: Zero Hunger</span>
+            <span class="badge bg-leaf text-white">UN SDG 12: Responsible Consumption</span>
+          </div>
+        </div>
+      </footer>
+    </div>
+  </div>
+
+  <!-- Bootstrap 5 Bundle JS -->
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+
+  <!-- Application JS -->
+  <script src="{{ url_for('static', filename='js/app.js') }}"></script>
+
+  <!-- Extra JS per view -->
+  {% block extra_js %}{% endblock %}
+</body>
+</html>
