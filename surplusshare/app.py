@@ -219,6 +219,7 @@ def create_app(test_config=None):
 
 
 # Allow running with `python app.py`
-if __name__ == '__main__':
-    application = create_app()
-    application.run(debug=True, port=5000)
+app = create_app()
+
+if __name__ == "__main__":
+    app.run(debug=True, port=5000)
