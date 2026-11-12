@@ -1,3 +1,5 @@
+from pathlib import Path
+
 """Flask application factory for SurplusShare."""
 
 from datetime import datetime, timedelta
@@ -17,7 +19,13 @@ def create_app(test_config=None):
     Returns:
         Flask: The configured Flask application instance.
     """
-    app = Flask(__name__, instance_relative_config=False)
+    base_dir = Path(__file__).resolve().parent
+    app = Flask(
+        __name__,
+        instance_relative_config=False,
+        template_folder=str(base_dir / "templates"),
+        static_folder=str(base_dir / "static"),
+    )
 
     # Load configuration
     if test_config is None:
