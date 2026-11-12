@@ -2,6 +2,7 @@
 
 import sqlite3
 import os
+import shutil
 import click
 from flask import current_app, g
 
@@ -15,8 +16,22 @@ def get_db():
     if 'db' not in g:
         db_path = current_app.config['DATABASE']
         db_dir = os.path.dirname(db_path)
-        if not os.path.exists(db_dir):
+        if db_dir and not os.path.exists(db_dir):
             os.makedirs(db_dir, exist_ok=True)
+
+        # On Vercel serverless execution, copy pre-seeded database to /tmp if not present
+        if os.environ.get('VERCEL') and not os.path.exists(db_path):
+            bundled_db = os.path.join(os.path.dirname(__file__), 'surplusshare.db')
+            if os.path.exists(bundled_db) and os.path.getsize(bundled_db) > 0:
+                shutil.copyfile(bundled_db, db_path)
+            else:
+                # Fallback: create schema if bundled db is not found
+                conn = sqlite3.connect(db_path, detect_types=sqlite3.PARSE_DECLTYPES)
+                schema_path = os.path.join(os.path.dirname(__file__), 'schema.sql')
+                if os.path.exists(schema_path):
+                    with open(schema_path, 'r', encoding='utf-8') as f:
+                        conn.executescript(f.read())
+                conn.close()
 
         g.db = sqlite3.connect(
             db_path,

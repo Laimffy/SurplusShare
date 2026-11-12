@@ -1,0 +1,14 @@
+{
+  "$schema": "https://openapi.vercel.sh/vercel.json",
+  "functions": {
+    "surplusshare/app.py": {
+      "includeFiles": "{surplusshare/templates/**,surplusshare/static/**,surplusshare/database/**}"
+    },
+    "app.py": {
+      "includeFiles": "{templates/**,static/**,database/**}"
+    },
+    "*.py": {
+      "includeFiles": "{templates/**,static/**,database/**}"
+    }
+  }
+}

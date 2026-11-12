@@ -20,12 +20,35 @@ def create_app(test_config=None):
         Flask: The configured Flask application instance.
     """
     base_dir = Path(__file__).resolve().parent
+    template_dir = base_dir / "templates"
+    static_dir = base_dir / "static"
+
     app = Flask(
         __name__,
         instance_relative_config=False,
-        template_folder=str(base_dir / "templates"),
-        static_folder=str(base_dir / "static"),
+        template_folder=str(template_dir),
+        static_folder=str(static_dir),
     )
+
+    # Multi-path template resolution for robust execution across local, test, and Vercel serverless environments
+    import os
+    from jinja2 import FileSystemLoader
+    search_paths = []
+    for candidate in [
+        template_dir,
+        Path.cwd() / "templates",
+        Path.cwd() / "surplusshare" / "templates",
+        Path("/var/task/templates"),
+        Path("/var/task/surplusshare/templates"),
+    ]:
+        candidate_str = str(candidate)
+        if candidate.is_dir() and candidate_str not in search_paths:
+            search_paths.append(candidate_str)
+
+    if not search_paths:
+        search_paths = [str(template_dir)]
+
+    app.jinja_loader = FileSystemLoader(search_paths)
 
     # Load configuration
     if test_config is None:
